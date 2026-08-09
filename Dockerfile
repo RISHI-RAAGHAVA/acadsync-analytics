@@ -6,6 +6,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
+    git \
     libx11-6 \
     libglib2.0-0 \
     libsm6 \
