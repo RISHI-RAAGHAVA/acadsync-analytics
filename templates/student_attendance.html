@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Attendance | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{min-height:100vh;font-family:'DM Sans',sans-serif;background:#f1f5f9;color:#0f172a}
+
+        .topbar{background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;padding:0 32px;height:60px;position:sticky;top:0;z-index:100}
+        .tb-logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+        .tb-ico{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem}
+        .tb-nm{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:800;color:#0f172a}
+        .tb-nm span{color:#2563eb}
+        .tb-nav{display:flex;align-items:center;gap:2px;margin-left:20px}
+        .tb-link{padding:6px 12px;border-radius:8px;font-size:.81rem;font-weight:500;color:#64748b;text-decoration:none;transition:.15s;display:flex;align-items:center;gap:5px}
+        .tb-link:hover{background:#f1f5f9;color:#0f172a}
+        .tb-link.active{background:#ecfdf5;color:#059669;font-weight:600}
+        .tb-right{margin-left:auto}
+        .tb-back{padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;color:#64748b;text-decoration:none;font-size:.8rem;font-weight:500;transition:.15s;display:flex;align-items:center;gap:5px}
+        .tb-back:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff}
+
+        .page-hd{background:#fff;border-bottom:1px solid #e2e8f0;padding:22px 32px}
+        .pg-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:3px}
+        .pg-sub{font-size:.84rem;color:#64748b}
+
+        .content{max-width:900px;margin:0 auto;padding:24px 24px 56px}
+
+        /* KPI STRIP */
+        .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:22px}
+        .kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;position:relative;overflow:hidden}
+        .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+        .kc-b::before{background:#2563eb} .kc-g::before{background:#10b981}
+        .kc-r::before{background:#ef4444} .kc-a::before{background:#f59e0b}
+        .kpi-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#64748b;margin-bottom:7px}
+        .kpi-value{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;margin-bottom:2px}
+        .kc-b .kpi-value{color:#2563eb} .kc-g .kpi-value{color:#10b981}
+        .kc-r .kpi-value{color:#ef4444} .kc-a .kpi-value{color:#f59e0b}
+        .kpi-sub{font-size:.7rem;color:#94a3b8}
+
+        /* MAIN GRID */
+        .main-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+        .panel{background:#fff;border:1px solid #e2e8f0;border-radius:13px;overflow:hidden}
+        .panel-hd{padding:13px 18px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:7px}
+        .ph-dot{width:7px;height:7px;border-radius:50%}
+        .ph-title{font-family:'Syne',sans-serif;font-size:.83rem;font-weight:700}
+        .panel-body{padding:20px}
+
+        /* ring */
+        .ring-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+        .ring-outer{position:relative;width:155px;height:155px}
+        .ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
+        .ring-bg{fill:none;stroke:#f1f5f9;stroke-width:11}
+        .ring-fg{fill:none;stroke-width:11;stroke-linecap:round;transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)}
+        .ring-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+        .ring-pct{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;line-height:1}
+        .ring-lbl{font-size:.65rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+        .att-detail{width:100%;display:flex;flex-direction:column;gap:0}
+        .att-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f8fafc;font-size:.84rem}
+        .att-row:last-child{border-bottom:none}
+        .att-row-label{display:flex;align-items:center;gap:7px;color:#64748b}
+        .att-row-val{font-weight:700;font-family:'Syne',sans-serif}
+
+        .status-banner{padding:11px 14px;border-radius:9px;display:flex;align-items:center;gap:9px;font-size:.81rem;font-weight:600;margin-top:12px}
+        .sb-ok  {background:#ecfdf5;border:1px solid rgba(16,185,129,.2);color:#059669}
+        .sb-warn{background:#fffbeb;border:1px solid rgba(245,158,11,.2);color:#b45309}
+        .sb-bad {background:#fef2f2;border:1px solid rgba(239,68,68,.2);color:#dc2626}
+
+        /* progress bar */
+        .prog-panel{background:#fff;border:1px solid #e2e8f0;border-radius:13px;padding:20px 22px}
+        .prog-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+        .prog-label{font-family:'Syne',sans-serif;font-size:.83rem;font-weight:700}
+        .prog-sub{font-size:.76rem;color:#64748b;margin-bottom:12px}
+        .prog-track{height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden;margin-bottom:8px}
+        .prog-fill{height:100%;border-radius:5px;width:0;transition:width 1.4s cubic-bezier(.4,0,.2,1)}
+        .prog-markers{display:flex;justify-content:space-between;font-size:.72rem;color:#94a3b8}
+        .prog-info{margin-top:12px;padding:9px 13px;border-radius:8px;font-size:.78rem;display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+        .pi-warn{background:#fffbeb;border:1px solid rgba(245,158,11,.18);color:#b45309}
+        .pi-ok  {background:#ecfdf5;border:1px solid rgba(16,185,129,.18);color:#059669}
+
+        @media(max-width:800px){.kpi-row{grid-template-columns:1fr 1fr}.main-grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a class="tb-logo" href="/student/dashboard">
+        <div class="tb-ico"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="tb-nm">ACADSYNC <span>TECH</span></div>
+    </a>
+    <nav class="tb-nav">
+        <a href="/student/dashboard"       class="tb-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        <a href="/student/tasks"           class="tb-link"><i class="fa-solid fa-pen-to-square"></i> Tasks</a>
+        <a href="/student/view_attendance" class="tb-link active"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+        <a href="/student/view_scores"     class="tb-link"><i class="fa-solid fa-chart-line"></i> Scores</a>
+    </nav>
+    <div class="tb-right">
+        <a href="/student/dashboard" class="tb-back"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+</div>
+
+<div class="page-hd">
+    <div class="pg-title">My Attendance</div>
+    <div class="pg-sub">Face recognition-based attendance — updated automatically on each login.</div>
+</div>
+
+<div class="content">
+
+    <!-- KPI STRIP -->
+    <div class="kpi-row">
+        <div class="kpi-card kc-b">
+            <div class="kpi-label">Total Days</div>
+            <div class="kpi-value">{{ total_days }}</div>
+            <div class="kpi-sub">College working days</div>
+        </div>
+        <div class="kpi-card kc-g">
+            <div class="kpi-label">Present</div>
+            <div class="kpi-value">{{ attended_days }}</div>
+            <div class="kpi-sub">Days attended</div>
+        </div>
+        <div class="kpi-card kc-r">
+            <div class="kpi-label">Absent</div>
+            <div class="kpi-value">{{ total_days - attended_days }}</div>
+            <div class="kpi-sub">Days missed</div>
+        </div>
+        <div class="kpi-card kc-a">
+            <div class="kpi-label">Attendance %</div>
+            <div class="kpi-value">{{ percentage }}%</div>
+            <div class="kpi-sub">{% if percentage >= 75 %}Good standing{% else %}Needs improvement{% endif %}</div>
+        </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+        <!-- Ring -->
+        <div class="panel">
+            <div class="panel-hd">
+                <span class="ph-dot" style="background:{% if percentage >= 75 %}#10b981{% elif percentage >= 50 %}#f59e0b{% else %}#ef4444{% endif %}"></span>
+                <span class="ph-title">Attendance Rate</span>
+            </div>
+            <div class="panel-body">
+                <div class="ring-wrap">
+                    <div class="ring-outer">
+                        <svg class="ring-svg" viewBox="0 0 100 100">
+                            <circle class="ring-bg" cx="50" cy="50" r="38"/>
+                            <circle class="ring-fg" cx="50" cy="50" r="38" id="ring"
+                                stroke="{% if percentage >= 75 %}#10b981{% elif percentage >= 50 %}#f59e0b{% else %}#ef4444{% endif %}"
+                                stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
+                        </svg>
+                        <div class="ring-center">
+                            <div class="ring-pct" style="color:{% if percentage >= 75 %}#10b981{% elif percentage >= 50 %}#f59e0b{% else %}#ef4444{% endif %}">{{ percentage }}%</div>
+                            <div class="ring-lbl">Present</div>
+                        </div>
+                    </div>
+
+                    <div class="att-detail">
+                        <div class="att-row">
+                            <div class="att-row-label"><i class="fa-solid fa-calendar" style="color:#2563eb;width:14px;text-align:center"></i> Total Days</div>
+                            <div class="att-row-val" style="color:#2563eb">{{ total_days }}</div>
+                        </div>
+                        <div class="att-row">
+                            <div class="att-row-label"><i class="fa-solid fa-circle-check" style="color:#10b981;width:14px;text-align:center"></i> Present</div>
+                            <div class="att-row-val" style="color:#10b981">{{ attended_days }}</div>
+                        </div>
+                        <div class="att-row">
+                            <div class="att-row-label"><i class="fa-solid fa-circle-xmark" style="color:#ef4444;width:14px;text-align:center"></i> Absent</div>
+                            <div class="att-row-val" style="color:#ef4444">{{ total_days - attended_days }}</div>
+                        </div>
+                    </div>
+
+                    {% if percentage >= 75 %}
+                    <div class="status-banner sb-ok"><i class="fa-solid fa-circle-check"></i> Good standing — attendance above 75%.</div>
+                    {% elif percentage >= 50 %}
+                    <div class="status-banner sb-warn"><i class="fa-solid fa-triangle-exclamation"></i> Warning — attendance below 75%. Attend more!</div>
+                    {% else %}
+                    <div class="status-banner sb-bad"><i class="fa-solid fa-circle-xmark"></i> Critical — below 50%. Immediate action required.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Donut chart -->
+        <div class="panel">
+            <div class="panel-hd">
+                <span class="ph-dot" style="background:#2563eb"></span>
+                <span class="ph-title">Present vs Absent</span>
+            </div>
+            <div class="panel-body" style="display:flex;flex-direction:column;align-items:center;gap:12px">
+                <div style="position:relative;height:210px;width:100%">
+                    <canvas id="cAtt"></canvas>
+                </div>
+                <div style="display:flex;gap:20px;font-size:.76rem;font-weight:600">
+                    <span><span style="color:#10b981">■</span> Present {{ attended_days }} days</span>
+                    <span><span style="color:#ef4444">■</span> Absent {{ total_days - attended_days }} days</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PROGRESS PANEL -->
+    <div class="prog-panel">
+        <div class="prog-top">
+            <div class="prog-label">Attendance Target</div>
+            <span style="font-size:.76rem;font-weight:700;color:{% if percentage >= 75 %}#10b981{% else %}#ef4444{% endif %}">{{ percentage }}% / 75% required</span>
+        </div>
+        <div class="prog-sub">The minimum required attendance to avoid academic penalties is 75%.</div>
+        <div class="prog-track">
+            <div id="progFill" class="prog-fill" style="background:{% if percentage >= 75 %}linear-gradient(90deg,#10b981,#059669){% elif percentage >= 50 %}linear-gradient(90deg,#f59e0b,#d97706){% else %}linear-gradient(90deg,#ef4444,#dc2626){% endif %}"></div>
+        </div>
+        <div class="prog-markers"><span>0%</span><span style="color:#2563eb;font-weight:600">Target: 75%</span><span>100%</span></div>
+        {% if percentage < 75 %}
+        <div class="prog-info pi-warn">
+            <i class="fa-solid fa-info-circle" style="flex-shrink:0;margin-top:1px"></i>
+            You need to attend approximately <strong>{{ [((75 * total_days / 100) - attended_days) | int + 1, 0] | max }} more days</strong> to reach the 75% minimum.
+        </div>
+        {% else %}
+        <div class="prog-info pi-ok">
+            <i class="fa-solid fa-check-circle" style="flex-shrink:0;margin-top:1px"></i>
+            You have met the minimum attendance requirement. Keep it up!
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+    const PCT = {{ percentage }};
+    const PRESENT = {{ attended_days }};
+    const ABSENT  = {{ total_days - attended_days }};
+
+    // Ring animation
+    setTimeout(() => {
+        const circumference = 238.76;
+        document.getElementById('ring').style.strokeDashoffset = circumference - (PCT / 100) * circumference;
+    }, 200);
+
+    // Progress bar
+    setTimeout(() => {
+        document.getElementById('progFill').style.width = Math.min(PCT, 100) + '%';
+    }, 200);
+
+    // Chart
+    new Chart(document.getElementById('cAtt').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Present', 'Absent'],
+            datasets: [{
+                data: [PRESENT, ABSENT || 0.001],
+                backgroundColor: ['#10b981', '#ef4444'],
+                borderWidth: 5, borderColor: '#fff', hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, cutout: '66%',
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw} days` } }
+            }
+        }
+    });
+</script>
+</body>
+</html>

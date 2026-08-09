@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Scores | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{min-height:100vh;font-family:'DM Sans',sans-serif;background:#f1f5f9;color:#0f172a}
+
+        .topbar{background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;padding:0 32px;height:60px;position:sticky;top:0;z-index:100}
+        .tb-logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+        .tb-ico{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem}
+        .tb-nm{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:800;color:#0f172a}
+        .tb-nm span{color:#2563eb}
+        .tb-breadcrumb{font-size:.82rem;color:#94a3b8;margin-left:4px;display:flex;align-items:center;gap:6px}
+        .tb-breadcrumb a{color:#64748b;text-decoration:none}
+        .tb-breadcrumb a:hover{color:#2563eb}
+        .tb-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+        .tb-dept-badge{padding:5px 13px;border-radius:20px;background:#ecfdf5;border:1px solid rgba(16,185,129,.2);color:#059669;font-size:.76rem;font-weight:600}
+        .tb-back{padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;color:#64748b;text-decoration:none;font-size:.8rem;font-weight:500;transition:.15s;display:flex;align-items:center;gap:5px}
+        .tb-back:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff}
+
+        .page-hd{background:#fff;border-bottom:1px solid #e2e8f0;padding:22px 32px}
+        .pg-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;margin-bottom:3px}
+        .pg-sub{font-size:.84rem;color:#64748b}
+
+        .content{max-width:1020px;margin:0 auto;padding:24px 24px 56px}
+
+        .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:22px}
+        .kpi-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;position:relative;overflow:hidden}
+        .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:12px 12px 0 0}
+        .kc-t::before{background:#14b8a6} .kc-g::before{background:#10b981}
+        .kc-r::before{background:#ef4444} .kc-a::before{background:#f59e0b}
+        .kpi-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#64748b;margin-bottom:7px}
+        .kpi-value{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;line-height:1;margin-bottom:2px}
+        .kc-t .kpi-value{color:#14b8a6} .kc-g .kpi-value{color:#10b981}
+        .kc-r .kpi-value{color:#ef4444} .kc-a .kpi-value{color:#f59e0b}
+        .kpi-sub{font-size:.7rem;color:#94a3b8}
+
+        .filter-bar{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:10px 16px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+        .fl-lbl{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#64748b}
+        .fl-chip{padding:5px 13px;border-radius:20px;font-size:.76rem;font-weight:600;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;cursor:pointer;transition:.15s;font-family:'DM Sans',sans-serif}
+        .fl-chip:hover{border-color:#14b8a6;color:#14b8a6;background:#f0fdfa}
+        .fl-chip.on{background:#14b8a6;border-color:#14b8a6;color:#fff}
+        .fl-div{width:1px;height:18px;background:#e2e8f0;flex-shrink:0}
+        .fl-search{
+            border:1.5px solid #e2e8f0;border-radius:8px;padding:5px 10px 5px 28px;font-size:.76rem;
+            background:#f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2394a3b8'%3E%3Cpath fill-rule='evenodd' d='M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z' clip-rule='evenodd'/%3E%3C/svg%3E") no-repeat 8px center/13px;
+            outline:none;width:185px;font-family:'DM Sans',sans-serif;color:#0f172a;transition:.15s
+        }
+        .fl-search:focus{border-color:#14b8a6;width:210px}
+        .fl-count{margin-left:auto;font-size:.72rem;color:#64748b}
+        .fl-count strong{color:#0f172a}
+
+        .table-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:13px;overflow:hidden;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+        table{width:100%;border-collapse:collapse}
+        thead tr{background:#f8fafc}
+        th{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#64748b;padding:11px 16px;text-align:left;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+        td{padding:13px 16px;font-size:.84rem;border-bottom:1px solid #f8fafc;vertical-align:middle}
+        tbody tr{transition:background .12s}
+        tbody tr:hover{background:#f8fafc}
+        tbody tr:last-child td{border-bottom:none}
+
+        .name-cell{display:flex;align-items:center;gap:9px}
+        .s-av{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;color:#fff;flex-shrink:0}
+        .s-name{font-weight:600}
+        .roll-code{font-family:'JetBrains Mono',monospace;font-size:.74rem;background:#f0fdfa;color:#14b8a6;padding:3px 8px;border-radius:5px}
+
+        .sp{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:.68rem;font-weight:700;text-transform:uppercase}
+        .sp-done{background:#dcfce7;color:#15803d}
+        .sp-no{background:#fef2f2;color:#dc2626}
+        .sp-dot{width:5px;height:5px;border-radius:50%}
+        .sp-done .sp-dot{background:#15803d}
+        .sp-no .sp-dot{background:#dc2626;animation:blink 1.4s infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+        .score-cell{display:flex;align-items:center;gap:8px}
+        .score-bar{flex:1;height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden}
+        .score-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#14b8a6,#0d9488)}
+        .score-num{font-family:'JetBrains Mono',monospace;font-size:.76rem;font-weight:600;color:#14b8a6;min-width:36px}
+
+        #noMatch{display:none}
+        #noMatch td{text-align:center;padding:44px;color:#64748b;font-size:.85rem}
+        .empty{text-align:center;padding:50px;color:#64748b}
+        .empty i{font-size:2rem;opacity:.2;display:block;margin-bottom:10px}
+
+        @media(max-width:800px){.kpi-row{grid-template-columns:1fr 1fr}}
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a class="tb-logo" href="/staff_dashboard">
+        <div class="tb-ico"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="tb-nm">ACADSYNC <span>TECH</span></div>
+    </a>
+    <div class="tb-breadcrumb">
+        <i class="fa-solid fa-chevron-right" style="font-size:.65rem"></i>
+        <a href="/staff_dashboard">Dashboard</a>
+        <i class="fa-solid fa-chevron-right" style="font-size:.65rem"></i>
+        <span style="color:#0f172a;font-weight:600">Student Scores</span>
+    </div>
+    <div class="tb-right">
+        <div class="tb-dept-badge"><i class="fa-solid fa-building" style="margin-right:5px"></i>{{ dept }}</div>
+        <a href="/staff_dashboard" class="tb-back"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+</div>
+
+<div class="page-hd">
+    <div class="pg-title">{{ dept }} — Student Score Board</div>
+    <div class="pg-sub">All students in your department and their task performance summary.</div>
+</div>
+
+<div class="content">
+
+    <div class="kpi-row">
+        <div class="kpi-card kc-t">
+            <div class="kpi-label">Total Students</div>
+            <div class="kpi-value">{{ results | length }}</div>
+            <div class="kpi-sub">In department</div>
+        </div>
+        <div class="kpi-card kc-g">
+            <div class="kpi-label">Attended</div>
+            <div class="kpi-value">{{ results | selectattr('status','equalto','Attended') | list | length }}</div>
+            <div class="kpi-sub">Submitted tasks</div>
+        </div>
+        <div class="kpi-card kc-r">
+            <div class="kpi-label">Not Attended</div>
+            <div class="kpi-value">{{ results | rejectattr('status','equalto','Attended') | list | length }}</div>
+            <div class="kpi-sub">No submissions</div>
+        </div>
+        <div class="kpi-card kc-a">
+            {% set att = results | selectattr('status','equalto','Attended') | list %}
+            {% set avg = (att | sum(attribute='score') / att | length) | round(1) if att else 0 %}
+            <div class="kpi-label">Avg Score</div>
+            <div class="kpi-value">{{ avg }}</div>
+            <div class="kpi-sub">Among attended</div>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <span class="fl-lbl">Status</span>
+        <button class="fl-chip on" data-val="All"          onclick="filterStatus(this)">All</button>
+        <button class="fl-chip"    data-val="Attended"     onclick="filterStatus(this)">Attended</button>
+        <button class="fl-chip"    data-val="Not Attended" onclick="filterStatus(this)">Not Attended</button>
+        <div class="fl-div"></div>
+        <input class="fl-search" type="text" id="searchBox" placeholder="Search student…" oninput="applyFilters()">
+        <div class="fl-count">Showing <strong id="showCount">{{ results | length }}</strong> of <strong>{{ results | length }}</strong></div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Roll No.</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Tasks</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for res in results %}
+                <tr data-status="{{ res['status'] }}" data-name="{{ res['name'] | lower }}">
+                    <td style="color:#94a3b8;font-size:.74rem;font-weight:600">{{ loop.index }}</td>
+                    <td>
+                        <div class="name-cell">
+                            <div class="s-av" style="background:hsl({{ loop.index0 * 57 + 160 }},52%,48%)">{{ res['name'][0] | upper }}</div>
+                            <span class="s-name">{{ res['name'] }}</span>
+                        </div>
+                    </td>
+                    <td><span class="roll-code">{{ res['roll_no'] }}</span></td>
+                    <td>
+                        {% if res['status'] == 'Attended' %}
+                        <span class="sp sp-done"><span class="sp-dot"></span>Attended</span>
+                        {% else %}
+                        <span class="sp sp-no"><span class="sp-dot"></span>Not Attended</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if res['status'] == 'Attended' %}
+                        <div class="score-cell">
+                            <div class="score-bar"><div class="score-fill" style="width:{{ [res['score'] * 5, 100] | min }}%"></div></div>
+                            <div class="score-num">{{ res['score'] }}</div>
+                        </div>
+                        {% else %}
+                        <span style="color:#cbd5e1">—</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-family:'JetBrains Mono',monospace;font-size:.76rem;color:#64748b">
+                        {% if res['status'] == 'Attended' %}{{ res['total_tasks'] }}{% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6"><div class="empty"><i class="fa-solid fa-inbox"></i>No students found.</div></td></tr>
+                {% endfor %}
+            </tbody>
+            <tbody><tr id="noMatch"><td colspan="6"><i class="fa-solid fa-magnifying-glass" style="margin-right:7px;opacity:.4"></i>No students match your filters.</td></tr></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+let activeStatus = 'All';
+function filterStatus(el){
+    document.querySelectorAll('.fl-chip').forEach(c=>c.classList.remove('on'));
+    el.classList.add('on'); activeStatus = el.dataset.val; applyFilters();
+}
+function applyFilters(){
+    const q = document.getElementById('searchBox').value.trim().toLowerCase();
+    const rows = document.querySelectorAll('#tableBody tr[data-status]');
+    let v = 0;
+    rows.forEach(r => {
+        const ok = (activeStatus === 'All' || r.dataset.status === activeStatus) && (!q || r.dataset.name.includes(q));
+        r.style.display = ok ? '' : 'none'; if(ok) v++;
+    });
+    document.getElementById('showCount').textContent = v;
+    document.getElementById('noMatch').style.display = v === 0 && rows.length > 0 ? '' : 'none';
+}
+</script>
+</body>
+</html>

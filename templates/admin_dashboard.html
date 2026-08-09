@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | ACADSYNC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent:       #2563eb;
+            --accent-light: #eff6ff;
+            --green:        #10b981;
+            --amber:        #f59e0b;
+            --red:          #ef4444;
+            --bg:           #f1f5fb;
+            --surface:      #ffffff;
+            --border:       #e2e8f0;
+            --text:         #0f172a;
+            --muted:        #64748b;
+            --sidebar-w:    240px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w); background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            position: fixed; inset: 0 auto 0 0;
+            z-index: 200; overflow-y: auto;
+        }
+        .sb-brand {
+            padding: 22px 18px 18px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px; text-decoration: none;
+        }
+        .sb-icon {
+            width: 36px; height: 36px; background: var(--accent); border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: .9rem; flex-shrink: 0;
+        }
+        .sb-name { font-size: 1rem; font-weight: 800; color: var(--text); }
+        .sb-name span { color: var(--accent); }
+        .sb-sub { font-size: .6rem; color: var(--muted); margin-top: 1px; }
+
+        .sb-nav { padding: 12px 10px; flex: 1; }
+        .sb-section {
+            font-size: .6rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1.4px; color: var(--muted); padding: 10px 8px 5px;
+        }
+        .sb-item {
+            display: flex; align-items: center; gap: 9px;
+            padding: 9px 10px; border-radius: 9px;
+            font-size: .84rem; font-weight: 500;
+            color: var(--muted); text-decoration: none;
+            transition: all .18s; margin-bottom: 1px;
+        }
+        .sb-item i { width: 16px; text-align: center; font-size: .82rem; }
+        .sb-item:hover { background: var(--accent-light); color: var(--accent); }
+        .sb-item.active { background: var(--accent); color: #fff; box-shadow: 0 3px 10px rgba(37,99,235,.28); }
+        .sb-badge {
+            margin-left: auto; background: var(--red); color: #fff;
+            font-size: .6rem; font-weight: 700; padding: 1px 6px;
+            border-radius: 10px; min-width: 18px; text-align: center;
+        }
+        .sb-item.active .sb-badge { background: rgba(255,255,255,.3); }
+        .sb-footer { padding: 12px; border-top: 1px solid var(--border); }
+        .sb-user {
+            display: flex; align-items: center; gap: 9px;
+            background: var(--accent-light); padding: 9px 11px; border-radius: 10px;
+        }
+        .sb-avatar {
+            width: 32px; height: 32px; border-radius: 8px; background: var(--accent);
+            color: #fff; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .8rem; flex-shrink: 0;
+        }
+        .sb-uname { font-size: .8rem; font-weight: 700; }
+        .sb-urole { font-size: .67rem; color: var(--muted); }
+
+        /* ── MAIN ── */
+        .main-wrap { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            height: 60px; background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center;
+            padding: 0 24px; gap: 10px;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .topbar-title { font-size: 1rem; font-weight: 700; flex: 1; }
+        .topbar-title span { color: var(--muted); font-weight: 400; font-size: .88rem; }
+        .tb-btn {
+            width: 34px; height: 34px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--surface);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--muted); cursor: pointer; transition: .18s;
+            text-decoration: none; font-size: .8rem;
+        }
+        .tb-btn:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+        .tb-notif { position: relative; }
+        .tb-notif::after {
+            content: ''; position: absolute; top: 7px; right: 7px;
+            width: 6px; height: 6px; background: var(--red);
+            border-radius: 50%; border: 1.5px solid #fff;
+        }
+
+        /* ── CONTENT ── */
+        .content { padding: 22px 24px; flex: 1; }
+
+        /* ── KPI GRID ── */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 18px; }
+        .kpi-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 13px; padding: 18px 18px 14px;
+            position: relative; overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(37,99,235,.1); }
+        .kpi-card::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; border-radius: 13px 13px 0 0;
+        }
+        .kpi-card.kb::after { background: var(--accent); }
+        .kpi-card.kg::after { background: var(--green); }
+        .kpi-card.ka::after { background: var(--amber); }
+        .kpi-card.kr::after { background: var(--red); }
+        .kpi-ico {
+            position: absolute; top: 15px; right: 15px;
+            width: 35px; height: 35px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center; font-size: .88rem;
+        }
+        .kb .kpi-ico { background: rgba(37,99,235,.1);  color: var(--accent); }
+        .kg .kpi-ico { background: rgba(16,185,129,.1); color: var(--green); }
+        .ka .kpi-ico { background: rgba(245,158,11,.1); color: var(--amber); }
+        .kr .kpi-ico { background: rgba(239,68,68,.1);  color: var(--red); }
+        .kpi-lbl { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .9px; color: var(--muted); margin-bottom: 8px; }
+        .kpi-num { font-size: 1.9rem; font-weight: 800; letter-spacing: -1px; line-height: 1; margin-bottom: 5px; }
+        .kb .kpi-num { color: var(--accent); }
+        .kg .kpi-num { color: var(--green); }
+        .ka .kpi-num { color: var(--amber); }
+        .kr .kpi-num { color: var(--red); }
+        .kpi-sub { font-size: .7rem; color: var(--muted); }
+
+        /* ── FILTER BAR ── */
+        .filter-bar {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 13px; padding: 11px 18px;
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+        .fl-label { font-size: .67rem; font-weight: 800; text-transform: uppercase; letter-spacing: .9px; color: var(--muted); }
+        .fl-chip {
+            padding: 5px 13px; border-radius: 20px; font-size: .77rem; font-weight: 600;
+            border: 1.5px solid var(--border); background: var(--bg); color: var(--muted);
+            cursor: pointer; transition: .18s; font-family: 'Outfit', sans-serif;
+        }
+        .fl-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .fl-chip.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(37,99,235,.25); }
+        .fl-div { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+        .fl-select {
+            border: 1.5px solid var(--border); border-radius: 8px;
+            padding: 5px 10px; font-size: .77rem; font-weight: 500;
+            color: var(--text); background: var(--bg);
+            cursor: pointer; outline: none; font-family: 'Outfit', sans-serif; transition: .18s;
+        }
+        .fl-select:focus { border-color: var(--accent); }
+        .fl-search {
+            border: 1.5px solid var(--border); border-radius: 8px;
+            padding: 5px 10px 5px 28px; font-size: .77rem;
+            background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2394a3b8'%3E%3Cpath fill-rule='evenodd' d='M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z' clip-rule='evenodd'/%3E%3C/svg%3E") no-repeat 8px center / 13px;
+            outline: none; width: 185px; font-family: 'Outfit', sans-serif;
+            color: var(--text); transition: .18s;
+        }
+        .fl-search:focus { border-color: var(--accent); width: 215px; }
+        .fl-count { margin-left: auto; font-size: .74rem; color: var(--muted); }
+        .fl-count strong { color: var(--text); }
+
+        /* ── PANEL ── */
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
+        .panel-hd {
+            padding: 14px 18px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .panel-title { font-size: .88rem; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+        .ptdot { width: 8px; height: 8px; border-radius: 50%; }
+        .pcount {
+            background: var(--accent-light); color: var(--accent);
+            font-size: .67rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;
+        }
+        .btn-rpt {
+            display: flex; align-items: center; gap: 5px;
+            padding: 6px 14px; font-size: .76rem; font-weight: 600;
+            background: var(--accent); color: #fff; border: none; border-radius: 8px;
+            cursor: pointer; font-family: 'Outfit', sans-serif;
+            text-decoration: none; transition: .18s;
+        }
+        .btn-rpt:hover { background: #1d4ed8; color: #fff; }
+
+        /* ── TABLE ── */
+        .tbl { width: 100%; border-collapse: collapse; }
+        .tbl thead tr { background: #f8fafc; }
+        .tbl th {
+            font-size: .65rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .8px; color: var(--muted); padding: 11px 16px;
+            text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap;
+        }
+        .tbl td { padding: 12px 16px; font-size: .82rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .tbl tbody tr { transition: background .13s; }
+        .tbl tbody tr:hover { background: #f8fafc; }
+        .tbl tbody tr:last-child td { border-bottom: none; }
+
+        .staff-cell { display: flex; align-items: center; gap: 9px; }
+        .s-av {
+            width: 30px; height: 30px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .72rem; font-weight: 700; color: #fff; flex-shrink: 0;
+        }
+        .s-name { font-weight: 600; }
+
+        .id-code {
+            font-family: 'JetBrains Mono', monospace; font-size: .74rem; font-weight: 500;
+            background: var(--accent-light); color: var(--accent); padding: 3px 8px; border-radius: 5px;
+        }
+
+        .dept-pill { font-size: .72rem; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+        .dp-cse   { background: rgba(37,99,235,.1);  color: var(--accent); }
+        .dp-ece   { background: rgba(245,158,11,.1); color: var(--amber); }
+        .dp-mech  { background: rgba(16,185,129,.1); color: var(--green); }
+        .dp-other { background: #f1f5f9; color: var(--muted); }
+
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: .69rem; font-weight: 700; text-transform: uppercase;
+        }
+        .sp-verified { background: #dcfce7; color: #15803d; }
+        .sp-pending  { background: #fef3c7; color: #b45309; }
+        .sp-dot { width: 5px; height: 5px; border-radius: 50%; }
+        .sp-verified .sp-dot { background: #15803d; }
+        .sp-pending  .sp-dot { background: #d97706; animation: blink 1.4s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        .btn-verify {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 5px 13px; font-size: .74rem; font-weight: 700;
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 7px; cursor: pointer;
+            font-family: 'Outfit', sans-serif; text-decoration: none; transition: .18s;
+        }
+        .btn-verify:hover { background: #1d4ed8; color: #fff; }
+        .btn-done {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 5px 13px; font-size: .74rem; font-weight: 600;
+            background: var(--surface); color: var(--muted);
+            border: 1px solid var(--border); border-radius: 7px;
+            font-family: 'Outfit', sans-serif; cursor: default;
+        }
+
+        /* ── BOTTOM GRID ── */
+        .bot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+
+        .dp-row { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid #f1f5f9; }
+        .dp-row:last-child { border-bottom: none; }
+        .dp-name { width: 52px; font-size: .78rem; font-weight: 700; }
+        .dp-track { flex: 1; height: 7px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+        .dp-fill  { height: 100%; border-radius: 4px; width: 0; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+        .dp-pct   { width: 34px; text-align: right; font-size: .74rem; font-weight: 700; color: var(--muted); }
+        .dp-cnt   { font-size: .7rem; color: var(--muted); width: 34px; text-align: right; }
+
+        .ac-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 16px; border-bottom: 1px solid #f1f5f9; }
+        .ac-item:last-child { border-bottom: none; }
+        .ac-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+        .ac-dot.blue  { background: var(--accent); }
+        .ac-dot.green { background: var(--green); }
+        .ac-dot.amber { background: var(--amber); }
+        .ac-text { font-size: .8rem; font-weight: 500; line-height: 1.4; }
+        .ac-meta { font-size: .68rem; color: var(--muted); margin-top: 1px; }
+
+        .empty { text-align: center; padding: 44px 20px; color: var(--muted); }
+        .empty i { font-size: 1.8rem; opacity: .2; margin-bottom: 10px; display: block; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        .fu { animation: up .4s both; }
+        .d1{animation-delay:.05s} .d2{animation-delay:.1s}
+        .d3{animation-delay:.15s} .d4{animation-delay:.2s}
+        .d5{animation-delay:.25s} .d6{animation-delay:.3s}
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+    <a class="sb-brand" href="/admin/dashboard">
+        <div class="sb-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div>
+            <div class="sb-name">ACADSYNC <span>TECH</span></div>
+            <div class="sb-sub">Admin Portal</div>
+        </div>
+    </a>
+
+    <nav class="sb-nav">
+        <div class="sb-section">Main</div>
+        <a href="/admin/dashboard" class="sb-item active">
+            <i class="fa-solid fa-gauge-high"></i> Dashboard
+        </a>
+        <a href="/admin/global_report" class="sb-item">
+            <i class="fa-solid fa-chart-line"></i> Analytics
+        </a>
+
+        <div class="sb-section" style="margin-top:10px;">Management</div>
+        <a href="#" class="sb-item">
+            <i class="fa-solid fa-users"></i> Staff
+            <span class="sb-badge" id="sbBadge">0</span>
+        </a>
+        <a href="#" class="sb-item">
+            <i class="fa-solid fa-user-graduate"></i> Students
+        </a>
+        <a href="#" class="sb-item">
+            <i class="fa-solid fa-building-columns"></i> Departments
+        </a>
+        <a href="#" class="sb-item">
+            <i class="fa-solid fa-calendar-check"></i> Attendance
+        </a>
+        <a href="#" class="sb-item">
+            <i class="fa-solid fa-clipboard-list"></i> Tasks
+        </a>
+
+        <div class="sb-section" style="margin-top:10px;">System</div>
+        <a href="#" class="sb-item">
+            <i class="fa-solid fa-gear"></i> Settings
+        </a>
+        <a href="/logout" class="sb-item" style="color:var(--red) !important;">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+    </nav>
+
+    <div class="sb-footer">
+        <div class="sb-user">
+            <div class="sb-avatar">MA</div>
+            <div>
+                <div class="sb-uname">Master Admin</div>
+                <div class="sb-urole">Super Administrator</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main-wrap">
+
+    <div class="topbar">
+        <div class="topbar-title">Dashboard <span>/ Staff Verification</span></div>
+        <a href="/admin/global_report" class="tb-btn" title="Analytics"><i class="fa-solid fa-chart-line"></i></a>
+        <div class="tb-btn tb-notif" title="Notifications"><i class="fa-solid fa-bell"></i></div>
+        <a href="/logout" class="tb-btn" title="Logout" style="color:var(--red);"><i class="fa-solid fa-right-from-bracket"></i></a>
+    </div>
+
+    <div class="content">
+
+        <!-- KPI CARDS -->
+        <div class="kpi-grid">
+            <div class="kpi-card kb fu d1">
+                <div class="kpi-ico"><i class="fa-solid fa-users"></i></div>
+                <div class="kpi-lbl">Total Staff</div>
+                <div class="kpi-num" id="kTotal">0</div>
+                <div class="kpi-sub">Registered accounts</div>
+            </div>
+            <div class="kpi-card kg fu d2">
+                <div class="kpi-ico"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="kpi-lbl">Verified</div>
+                <div class="kpi-num" id="kVerified">0</div>
+                <div class="kpi-sub">Active &amp; approved</div>
+            </div>
+            <div class="kpi-card ka fu d3">
+                <div class="kpi-ico"><i class="fa-solid fa-clock"></i></div>
+                <div class="kpi-lbl">Pending</div>
+                <div class="kpi-num" id="kPending">0</div>
+                <div class="kpi-sub">Awaiting action</div>
+            </div>
+            <div class="kpi-card kr fu d4">
+                <div class="kpi-ico"><i class="fa-solid fa-building"></i></div>
+                <div class="kpi-lbl">Departments</div>
+                <div class="kpi-num" id="kDepts">0</div>
+                <div class="kpi-sub">Active units</div>
+            </div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar fu d5">
+            <span class="fl-label"><i class="fa-solid fa-filter" style="margin-right:4px;"></i>Dept</span>
+            <button class="fl-chip on" data-group="dept" data-val="All"  onclick="handleChip(this)">All</button>
+            <button class="fl-chip"    data-group="dept" data-val="CSE"  onclick="handleChip(this)">CSE</button>
+            <button class="fl-chip"    data-group="dept" data-val="ECE"  onclick="handleChip(this)">ECE</button>
+            <button class="fl-chip"    data-group="dept" data-val="MECH" onclick="handleChip(this)">MECH</button>
+            <div class="fl-div"></div>
+            <span class="fl-label">Status</span>
+            <select class="fl-select" id="statusSel" onchange="applyFilters()">
+                <option value="All">All Status</option>
+                <option value="Verified">Verified</option>
+                <option value="Pending">Pending</option>
+            </select>
+            <div class="fl-div"></div>
+            <input class="fl-search" id="searchBox" type="text" placeholder="Search name…" oninput="applyFilters()">
+            <div class="fl-count">Showing <strong id="showCount">0</strong> of <strong id="totalCount">0</strong></div>
+        </div>
+
+        <!-- TABLE PANEL -->
+        <div class="panel fu d6">
+            <div class="panel-hd">
+                <div class="panel-title">
+                    <span class="ptdot" style="background:var(--accent)"></span>
+                    Staff Account Verification
+                    <span class="pcount" id="tableCount">0 records</span>
+                </div>
+                <a href="/admin/global_report" class="btn-rpt">
+                    <i class="fa-solid fa-chart-line"></i> Full Report
+                </a>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="tbl">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Staff Member</th>
+                            <th>Staff ID</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th style="text-align:right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffBody">
+                        {% for s in staff %}
+                        <tr data-dept="{{ s.department }}"
+                            data-status="{{ s.status }}"
+                            data-name="{{ s.name | lower }}">
+                            <td style="color:var(--muted);font-size:.76rem;font-weight:600;">#{{ s.id }}</td>
+                            <td>
+                                <div class="staff-cell">
+                                    <div class="s-av" style="background:hsl({{ loop.index0 * 53 + 200 }},62%,50%);">
+                                        {{ s.name[0] | upper }}
+                                    </div>
+                                    <span class="s-name">{{ s.name }}</span>
+                                </div>
+                            </td>
+                            <td><span class="id-code">{{ s.staff_id }}</span></td>
+                            <td>
+                                <span class="dept-pill
+                                    {% if s.department == 'CSE' %}dp-cse
+                                    {% elif s.department == 'ECE' %}dp-ece
+                                    {% elif s.department == 'MECH' %}dp-mech
+                                    {% else %}dp-other{% endif %}">
+                                    {{ s.department }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if s.status == 'Verified' %}
+                                <span class="status-pill sp-verified"><span class="sp-dot"></span> Verified</span>
+                                {% else %}
+                                <span class="status-pill sp-pending"><span class="sp-dot"></span> Pending</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align:right;">
+                                {% if s.status != 'Verified' %}
+                                <a href="/admin/verify/{{ s.id }}" class="btn-verify">
+                                    <i class="fa-solid fa-check"></i> Verify
+                                </a>
+                                {% else %}
+                                <button class="btn-done" disabled>
+                                    <i class="fa-solid fa-check-double"></i> Approved
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if not staff %}
+                        <tr id="emptyRow">
+                            <td colspan="6">
+                                <div class="empty">
+                                    <i class="fa-solid fa-inbox"></i>
+                                    No staff registrations found.
+                                </div>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <!-- no-results row injected by JS when filter returns 0 -->
+                <div id="noResults" style="display:none;">
+                    <div class="empty">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        No staff match your filters.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM GRID -->
+        <div class="bot-grid">
+            <div class="panel fu" style="animation-delay:.35s;">
+                <div class="panel-hd">
+                    <div class="panel-title">
+                        <span class="ptdot" style="background:var(--amber)"></span>
+                        Dept. Verification Rate
+                    </div>
+                </div>
+                <div id="deptBreakdown"></div>
+            </div>
+
+            <div class="panel fu" style="animation-delay:.4s;">
+                <div class="panel-hd">
+                    <div class="panel-title">
+                        <span class="ptdot" style="background:var(--green)"></span>
+                        Recent Activity
+                    </div>
+                </div>
+                <div id="activityFeed"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+/* ── Staff data injected from Flask ── */
+const STAFF = [
+    {% for s in staff %}
+    { id: {{ s.id }}, name: {{ s.name | tojson }}, staffId: {{ s.staff_id | tojson }}, dept: {{ s.department | tojson }}, status: {{ s.status | tojson }} }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+/* ── Animated counter ── */
+function countUp(el, target) {
+    let n = 0;
+    const step = Math.max(1, Math.ceil(target / 25));
+    const t = setInterval(() => {
+        n = Math.min(n + step, target);
+        el.textContent = n;
+        if (n >= target) clearInterval(t);
+    }, 35);
+}
+
+/* ── KPIs ── */
+function initKPIs() {
+    const total    = STAFF.length;
+    const verified = STAFF.filter(s => s.status === 'Verified').length;
+    const pending  = STAFF.filter(s => s.status !== 'Verified').length;
+    const depts    = new Set(STAFF.map(s => s.dept)).size;
+
+    countUp(document.getElementById('kTotal'),    total);
+    countUp(document.getElementById('kVerified'), verified);
+    countUp(document.getElementById('kPending'),  pending);
+    countUp(document.getElementById('kDepts'),    depts);
+
+    document.getElementById('sbBadge').textContent    = pending;
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('showCount').textContent  = total;
+    document.getElementById('tableCount').textContent = total + ' records';
+}
+
+/* ── Department bars ── */
+function buildDeptBreakdown() {
+    const map = {};
+    STAFF.forEach(s => {
+        if (!map[s.dept]) map[s.dept] = { total: 0, verified: 0 };
+        map[s.dept].total++;
+        if (s.status === 'Verified') map[s.dept].verified++;
+    });
+
+    const COLORS = ['#2563eb','#f59e0b','#10b981','#ef4444','#8b5cf6'];
+    let html = '';
+    Object.entries(map).forEach(([dept, d], i) => {
+        const pct = d.total ? Math.round(d.verified / d.total * 100) : 0;
+        html += `<div class="dp-row">
+            <div class="dp-name">${dept}</div>
+            <div class="dp-track"><div class="dp-fill" style="background:${COLORS[i%COLORS.length]}" data-w="${pct}"></div></div>
+            <div class="dp-pct">${pct}%</div>
+            <div class="dp-cnt">${d.verified}/${d.total}</div>
+        </div>`;
+    });
+    if (!html) html = '<div class="empty"><i class="fa-solid fa-chart-bar"></i>No data</div>';
+    document.getElementById('deptBreakdown').innerHTML = html;
+
+    requestAnimationFrame(() => setTimeout(() => {
+        document.querySelectorAll('.dp-fill').forEach(el => { el.style.width = el.dataset.w + '%'; });
+    }, 120));
+}
+
+/* ── Activity feed ── */
+function buildActivity() {
+    const items = [...STAFF].reverse().slice(0, 7);
+    let html = '';
+    items.forEach((s, i) => {
+        const ok     = s.status === 'Verified';
+        const color  = ok ? 'green' : 'amber';
+        const action = ok ? 'Account verified' : 'Awaiting verification';
+        html += `<div class="ac-item" style="animation:up .35s ${i * .06}s both;">
+            <div class="ac-dot ${color}"></div>
+            <div>
+                <div class="ac-text"><strong>${s.name}</strong> — ${action}</div>
+                <div class="ac-meta"><i class="fa-solid fa-building" style="margin-right:3px;"></i>${s.dept} · ${s.staffId}</div>
+            </div>
+        </div>`;
+    });
+    if (!html) html = '<div class="empty"><i class="fa-solid fa-bell-slash"></i>No activity yet</div>';
+    document.getElementById('activityFeed').innerHTML = html;
+}
+
+/* ── Filtering ── */
+let activeDept = 'All';
+
+function handleChip(el) {
+    const group = el.dataset.group;
+    document.querySelectorAll(`.fl-chip[data-group="${group}"]`).forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
+    if (group === 'dept') activeDept = el.dataset.val;
+    applyFilters();
+}
+
+function applyFilters() {
+    const activeStatus = document.getElementById('statusSel').value;
+    const q            = document.getElementById('searchBox').value.trim().toLowerCase();
+    const rows         = document.querySelectorAll('#staffBody tr[data-dept]');
+    let visible = 0;
+
+    rows.forEach(row => {
+        const ok =
+            (activeDept === 'All'    || row.dataset.dept   === activeDept) &&
+            (activeStatus === 'All'  || row.dataset.status === activeStatus) &&
+            (!q || row.dataset.name.includes(q));
+        row.style.display = ok ? '' : 'none';
+        if (ok) visible++;
+    });
+
+    document.getElementById('showCount').textContent  = visible;
+    document.getElementById('tableCount').textContent = visible + ' records';
+    document.getElementById('noResults').style.display = visible === 0 && rows.length > 0 ? '' : 'none';
+}
+
+/* ── Boot ── */
+initKPIs();
+buildDeptBreakdown();
+buildActivity();
+</script>
+</body>
+</html>

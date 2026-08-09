@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{min-height:100vh;font-family:'DM Sans',sans-serif;display:flex;background:#f1f5f9}
+
+        .img-panel{
+            width:400px;flex-shrink:0;position:relative;overflow:hidden;
+            display:flex;flex-direction:column;
+        }
+        .img-panel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+        .img-panel-overlay{position:absolute;inset:0;background:linear-gradient(170deg,rgba(37,99,235,.55) 0%,rgba(15,23,42,.85) 100%)}
+        .img-panel-content{position:relative;z-index:2;padding:32px;display:flex;flex-direction:column;height:100%}
+        .ip-logo{display:flex;align-items:center;gap:9px}
+        .ip-ico{width:34px;height:34px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;color:#2563eb;font-size:.85rem}
+        .ip-nm{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;color:#fff}
+        .ip-nm span{color:#fbbf24}
+        .ip-bottom{margin-top:auto}
+        .ip-heading{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;line-height:1.2;margin-bottom:10px}
+        .ip-heading span{color:#fbbf24}
+        .ip-body{font-size:.8rem;color:rgba(255,255,255,.62);line-height:1.65;margin-bottom:18px}
+        .ip-feat{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+        .ip-feat i{color:#fbbf24;font-size:.72rem;width:14px}
+        .ip-feat span{font-size:.78rem;color:rgba(255,255,255,.75)}
+
+        .form-panel{
+            flex:1;background:#fff;
+            display:flex;align-items:center;justify-content:center;
+            padding:40px 32px;overflow-y:auto
+        }
+        .form-inner{width:100%;max-width:400px}
+
+        .form-title{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;color:#0f172a;margin-bottom:5px}
+        .form-sub{font-size:.88rem;color:#64748b;line-height:1.5;margin-bottom:28px}
+
+        .field{margin-bottom:16px}
+        .field label{display:block;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:#64748b;margin-bottom:6px}
+        .fi{position:relative}
+        .fi i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.8rem;pointer-events:none}
+        .fi input{
+            width:100%;padding:12px 12px 12px 36px;
+            background:#f8fafc;border:1.5px solid #e2e8f0;
+            border-radius:10px;font-size:.9rem;font-family:'DM Sans',sans-serif;
+            color:#0f172a;outline:none;transition:.2s
+        }
+        .fi input::placeholder{color:#cbd5e1}
+        .fi input:focus{background:#fff;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+
+        /* camera */
+        .cam-section{margin:18px 0 14px}
+        .cam-lbl{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:#64748b;margin-bottom:7px;display:block}
+        .cam-box{
+            position:relative;border-radius:12px;overflow:hidden;background:#0f172a;
+            aspect-ratio:16/8;border:1.5px solid #e2e8f0
+        }
+        #video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
+        .cam-corner{position:absolute;width:16px;height:16px}
+        .cam-corner.tl{top:8px;left:8px;border-top:2px solid #3b82f6;border-left:2px solid #3b82f6}
+        .cam-corner.tr{top:8px;right:8px;border-top:2px solid #3b82f6;border-right:2px solid #3b82f6}
+        .cam-corner.bl{bottom:8px;left:8px;border-bottom:2px solid #3b82f6;border-left:2px solid #3b82f6}
+        .cam-corner.br{bottom:8px;right:8px;border-bottom:2px solid #3b82f6;border-right:2px solid #3b82f6}
+        .cam-scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(59,130,246,.8),transparent);animation:scan 2.5s ease-in-out infinite}
+        @keyframes scan{0%{top:10%}50%{top:85%}100%{top:10%}}
+        canvas{display:none}
+        .cam-status{font-size:.74rem;color:#64748b;margin-top:7px;display:flex;align-items:center;gap:6px}
+        .live-dot{width:6px;height:6px;border-radius:50%;background:#10b981;animation:blink 1.5s infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+        .btn-submit{
+            width:100%;padding:13px;margin-top:4px;
+            background:linear-gradient(135deg,#2563eb,#1d4ed8);
+            border:none;border-radius:10px;cursor:pointer;transition:.2s;
+            font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;color:#fff;
+            box-shadow:0 4px 14px rgba(37,99,235,.35)
+        }
+        .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(37,99,235,.45)}
+        .btn-submit:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+
+        .status-box{margin-top:10px;padding:10px 13px;border-radius:9px;font-size:.8rem;font-weight:500;display:none;align-items:center;gap:7px;line-height:1.4}
+        .status-box.loading{background:#eff6ff;border:1px solid rgba(37,99,235,.2);color:#2563eb;display:flex}
+        .status-box.error  {background:#fef2f2;border:1px solid rgba(239,68,68,.2);color:#dc2626;display:flex}
+        .status-box.success{background:#ecfdf5;border:1px solid rgba(16,185,129,.2);color:#059669;display:flex}
+
+        .form-footer{margin-top:20px;text-align:center;font-size:.82rem;color:#64748b}
+        .form-footer a{color:#2563eb;text-decoration:none;font-weight:500}
+
+        @media(max-width:700px){.img-panel{display:none}.form-panel{background:#f1f5f9}}
+    </style>
+</head>
+<body>
+
+    <div class="img-panel">
+        <img src="https://images.pexels.com/photos/1438072/pexels-photo-1438072.jpeg?auto=compress&cs=tinysrgb&w=800" alt="campus">
+        <div class="img-panel-overlay"></div>
+        <div class="img-panel-content">
+            <div class="ip-logo">
+                <div class="ip-ico"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="ip-nm">ACADSYNC <span>TECH</span></div>
+            </div>
+            <div class="ip-bottom">
+                <div class="ip-heading">Student<br><span>Secure Login.</span></div>
+                <div class="ip-body">Your face is your password. AI matches your biometric data instantly for secure, hassle-free access.</div>
+                <div class="ip-feat"><i class="fa-solid fa-shield-halved"></i><span>Biometric face recognition</span></div>
+                <div class="ip-feat"><i class="fa-solid fa-calendar-check"></i><span>Attendance auto-marked on login</span></div>
+                <div class="ip-feat"><i class="fa-solid fa-bolt"></i><span>Instant secure access</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-panel">
+        <div class="form-inner">
+            <div class="form-title">Student Login</div>
+            <div class="form-sub">Enter your email and password, then allow the camera to verify your face.</div>
+
+            <div class="field">
+                <label>Email Address</label>
+                <div class="fi"><i class="fa-solid fa-envelope"></i><input type="email" id="email" placeholder="student@college.com" required></div>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <div class="fi"><i class="fa-solid fa-lock"></i><input type="password" id="password" placeholder="Enter your password" required></div>
+            </div>
+
+            <div class="cam-section">
+                <span class="cam-lbl">Face Verification</span>
+                <div class="cam-box">
+                    <video id="video" autoplay playsinline></video>
+                    <div class="cam-corner tl"></div><div class="cam-corner tr"></div>
+                    <div class="cam-corner bl"></div><div class="cam-corner br"></div>
+                    <div class="cam-scan"></div>
+                </div>
+                <canvas id="canvas"></canvas>
+                <div class="cam-status"><div class="live-dot"></div> Camera active — position your face in the frame</div>
+            </div>
+
+            <button class="btn-submit" id="loginBtn" onclick="doLogin()">
+                <i class="fa-solid fa-face-smile" style="margin-right:7px"></i>Verify &amp; Login
+            </button>
+            <div id="statusBox" class="status-box"></div>
+
+            <div class="form-footer">
+                <a href="/">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        navigator.mediaDevices.getUserMedia({video:true})
+            .then(s => video.srcObject = s)
+            .catch(() => showStatus('error','Camera blocked. Please allow camera access and reload.'));
+
+        function showStatus(type, msg){
+            const b = document.getElementById('statusBox');
+            b.className = 'status-box ' + type;
+            const ic = {loading:'fa-spinner fa-spin', error:'fa-exclamation-circle', success:'fa-check-circle'};
+            b.innerHTML = `<i class="fa-solid ${ic[type]}" style="flex-shrink:0"></i> ${msg}`;
+        }
+
+        function doLogin(){
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
+            if(!email || !password){ showStatus('error','Please enter your email and password.'); return; }
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-right:7px"></i>Verifying…';
+            showStatus('loading','Capturing face and verifying identity…');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            fetch('/face_login',{method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({email, password, image: canvas.toDataURL('image/jpeg')})})
+            .then(r=>r.json()).then(data=>{
+                if(data.status==='success'){
+                    showStatus('success', data.message || 'Login successful! Redirecting…');
+                    setTimeout(()=>window.location.href='/student/dashboard', 1200);
+                } else {
+                    showStatus('error', data.message || 'Face not matched or invalid credentials.');
+                    btn.disabled=false;
+                    btn.innerHTML='<i class="fa-solid fa-face-smile" style="margin-right:7px"></i>Verify & Login';
+                }
+            }).catch(()=>{
+                showStatus('error','Server error. Please try again.');
+                btn.disabled=false;
+                btn.innerHTML='<i class="fa-solid fa-face-smile" style="margin-right:7px"></i>Verify & Login';
+            });
+        }
+    </script>
+</body>
+</html>

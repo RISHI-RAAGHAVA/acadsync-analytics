@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Scores | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --accent:#2563eb; --accent-light:#eff6ff;
+            --green:#10b981;  --green-light:#ecfdf5;
+            --amber:#f59e0b;  --amber-light:#fffbeb;
+            --red:#ef4444;
+            --purple:#8b5cf6;
+            --text:#0f172a; --muted:#64748b;
+            --bg:#f0f6ff; --surface:#fff; --border:#e2e8f0;
+        }
+        *, *::before, *::after { box-sizing:border-box;margin:0;padding:0; }
+        body { min-height:100vh;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg); }
+
+        .page-header { position:relative;height:210px;overflow:hidden; }
+        .ph-img {
+            position:absolute;inset:0;
+            background:url('https://images.pexels.com/photos/590493/pexels-photo-590493.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat;
+            filter:brightness(.7) saturate(.85);
+        }
+        .ph-ov { position:absolute;inset:0;background:linear-gradient(180deg,rgba(139,92,246,.2) 0%,rgba(15,23,42,.62) 100%); }
+        .ph-inner { position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between; }
+
+        .topbar { display:flex;align-items:center;gap:10px;padding:15px 36px;background:rgba(255,255,255,.1);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.12); }
+        .tb-back { display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.8rem;transition:.2s; }
+        .tb-back:hover{color:#fff;}
+        .tb-title { font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;flex:1;text-align:center;color:#fff; }
+        .tb-badge { background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;font-size:.73rem;color:#fff;font-weight:600; }
+        .ph-text { padding:18px 36px 22px; }
+        .ph-title { font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:3px; }
+        .ph-sub { font-size:.8rem;color:rgba(255,255,255,.65); }
+
+        .content { max-width:920px;margin:0 auto;padding:0 24px 60px; }
+
+        /* STATS */
+        .stats-row { display:flex;gap:12px;margin-top:-44px;position:relative;z-index:10;margin-bottom:24px;flex-wrap:wrap; }
+        .stat-card { flex:1;min-width:130px;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:15px 16px;box-shadow:0 4px 14px rgba(37,99,235,.08);transition:.2s;position:relative;overflow:hidden; }
+        .stat-card:hover{transform:translateY(-2px);}
+        .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:13px 13px 0 0;}
+        .sc-b::after{background:var(--accent);} .sc-g::after{background:var(--green);}
+        .sc-a::after{background:var(--amber);} .sc-p::after{background:var(--purple);}
+        .stat-val { font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:800;margin-bottom:2px; }
+        .sc-b .stat-val{color:var(--accent);} .sc-g .stat-val{color:var(--green);}
+        .sc-a .stat-val{color:var(--amber);} .sc-p .stat-val{color:var(--purple);}
+        .stat-lbl { font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-weight:600; }
+
+        /* CHART + TABLE GRID */
+        .top-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px; }
+        .panel { background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(15,23,42,.04); }
+        .panel-hd { padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+        .panel-title { font-family:'Syne',sans-serif;font-size:.84rem;font-weight:700;display:flex;align-items:center;gap:7px; }
+        .pt-dot { width:7px;height:7px;border-radius:50%; }
+        .panel-body { padding:18px; }
+
+        /* score cards */
+        .score-list { list-style:none; }
+        .score-item { padding:12px 0;border-bottom:1px solid #f1f5f9; }
+        .score-item:last-child { border-bottom:none;padding-bottom:0; }
+        .si-top { display:flex;align-items:center;justify-content:space-between;margin-bottom:7px; }
+        .si-title { font-weight:600;font-size:.86rem; }
+        .si-score { font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700; }
+        .si-meta { font-size:.7rem;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px; }
+        .si-bar { height:5px;background:#f1f5f9;border-radius:3px;overflow:hidden; }
+        .si-fill { height:100%;border-radius:3px;transition:width 1s ease; }
+
+        /* full table */
+        .table-wrap { background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(15,23,42,.04); }
+        table { width:100%;border-collapse:collapse; }
+        thead tr { background:#f8fafc; }
+        th { font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:11px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap; }
+        td { padding:12px 16px;font-size:.84rem;border-bottom:1px solid #f1f5f9;vertical-align:middle; }
+        tbody tr { transition:background .13s; }
+        tbody tr:hover { background:#f8fafc; }
+        tbody tr:last-child td { border-bottom:none; }
+
+        .task-nm { font-weight:600; }
+        .score-pill {
+            display:inline-flex;align-items:center;gap:4px;
+            padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:700;
+        }
+        .sp-full  { background:var(--green-light);color:#059669; }
+        .sp-half  { background:var(--amber-light);color:#b45309; }
+        .sp-zero  { background:var(--red);color:#fff;background:rgba(239,68,68,.1);color:#dc2626; }
+        .date-tag { font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted); }
+
+        .empty { text-align:center;padding:50px;color:var(--muted); }
+        .empty i { font-size:2rem;opacity:.2;display:block;margin-bottom:10px; }
+
+        @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        .fu{animation:up .42s both;}
+        .d1{animation-delay:.05s}.d2{animation-delay:.1s}
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <div class="ph-img"></div>
+        <div class="ph-ov"></div>
+        <div class="ph-inner">
+            <div class="topbar">
+                <a href="/student/dashboard" class="tb-back"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+                <div class="tb-title">My Scores</div>
+                <div class="tb-badge"><i class="fa-solid fa-chart-line" style="margin-right:4px;"></i>Performance</div>
+            </div>
+            <div class="ph-text">
+                <div class="ph-title">My Academic Scores</div>
+                <div class="ph-sub">Auto-graded results for all submitted activity tasks.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- STATS -->
+        {% set tasks_done = results | length %}
+        {% set max_possible = results | sum(attribute='total_marks') if results else 0 %}
+        {% set avg_pct = ((total / max_possible) * 100) | round(1) if max_possible else 0 %}
+
+        <div class="stats-row fu">
+            <div class="stat-card sc-b">
+                <div class="stat-val">{{ tasks_done }}</div>
+                <div class="stat-lbl">Tasks Submitted</div>
+            </div>
+            <div class="stat-card sc-g">
+                <div class="stat-val">{{ total }}</div>
+                <div class="stat-lbl">Total Score</div>
+            </div>
+            <div class="stat-card sc-a">
+                <div class="stat-val">{{ avg_pct }}%</div>
+                <div class="stat-lbl">Score Rate</div>
+            </div>
+            <div class="stat-card sc-p">
+                <div class="stat-val">{{ max_possible }}</div>
+                <div class="stat-lbl">Max Possible</div>
+            </div>
+        </div>
+
+        <!-- TOP GRID -->
+        <div class="top-grid fu d1">
+            <!-- Score breakdown list -->
+            <div class="panel">
+                <div class="panel-hd">
+                    <div class="panel-title"><span class="pt-dot" style="background:var(--accent)"></span>Score Breakdown</div>
+                </div>
+                <div class="panel-body" style="max-height:280px;overflow-y:auto;">
+                    {% if results %}
+                    <ul class="score-list">
+                        {% for r in results %}
+                        {% set pct = ((r.score / r.total_marks) * 100) | round(0) | int if r.total_marks else 0 %}
+                        <li class="score-item">
+                            <div class="si-top">
+                                <div class="si-title">{{ r.title }}</div>
+                                <div class="si-score" style="color:{% if pct >= 75 %}var(--green){% elif pct >= 50 %}var(--amber){% else %}var(--red){% endif %};">
+                                    {{ r.score }}/{{ r.total_marks }}
+                                </div>
+                            </div>
+                            <div class="si-meta"><i class="fa-solid fa-calendar" style="font-size:.7rem;"></i>{{ r.task_date }}</div>
+                            <div class="si-bar">
+                                <div class="si-fill" style="width:{{ pct }}%;background:{% if pct >= 75 %}var(--green){% elif pct >= 50 %}var(--amber){% else %}var(--red){% endif %};"></div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="empty"><i class="fa-solid fa-inbox"></i>No submissions yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="panel">
+                <div class="panel-hd">
+                    <div class="panel-title"><span class="pt-dot" style="background:var(--purple)"></span>Score Distribution</div>
+                </div>
+                <div class="panel-body" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                    <div style="position:relative;height:200px;width:100%;">
+                        <canvas id="cScore"></canvas>
+                    </div>
+                    <div style="display:flex;gap:12px;font-size:.73rem;font-weight:600;flex-wrap:wrap;justify-content:center;">
+                        <span><span style="color:var(--green);">■</span> Full marks</span>
+                        <span><span style="color:var(--amber);">■</span> Half marks</span>
+                        <span><span style="color:var(--red);">■</span> Zero</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FULL TABLE -->
+        <div class="table-wrap fu d2">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Task</th>
+                        <th>Date</th>
+                        <th>Your Answer</th>
+                        <th>Score</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if results %}
+                    {% for r in results %}
+                    {% set pct = ((r.score / r.total_marks) * 100) | round(0) | int if r.total_marks else 0 %}
+                    <tr>
+                        <td style="color:var(--muted);font-size:.74rem;font-weight:600;">{{ loop.index }}</td>
+                        <td><div class="task-nm">{{ r.title }}</div></td>
+                        <td><span class="date-tag">{{ r.task_date }}</span></td>
+                        <td style="max-width:220px;">
+                            <div style="font-size:.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ r.answer }}">
+                                {{ r.answer[:60] }}{% if r.answer | length > 60 %}…{% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span style="font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;color:{% if pct >= 75 %}var(--green){% elif pct >= 50 %}var(--amber){% else %}var(--red){% endif %};">
+                                {{ r.score }} / {{ r.total_marks }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if pct >= 100 %}
+                            <span class="score-pill sp-full"><i class="fa-solid fa-circle-check"></i> Full</span>
+                            {% elif pct >= 50 %}
+                            <span class="score-pill sp-half"><i class="fa-solid fa-circle-half-stroke"></i> Partial</span>
+                            {% else %}
+                            <span class="score-pill sp-zero"><i class="fa-solid fa-circle-xmark"></i> Zero</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr><td colspan="6" class="empty">
+                        <i class="fa-solid fa-inbox"></i>No task submissions yet.
+                    </td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        Chart.defaults.font.family = 'DM Sans';
+        Chart.defaults.color = '#64748b';
+
+        // Build score counts
+        let full = 0, half = 0, zero = 0;
+        {% for r in results %}
+        {% set pct = ((r.score / r.total_marks) * 100) | round(0) | int if r.total_marks else 0 %}
+        {% if pct >= 100 %}full++;
+        {% elif pct >= 50 %}half++;
+        {% else %}zero++;
+        {% endif %}
+        {% endfor %}
+
+        new Chart(document.getElementById('cScore').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Full Marks', 'Partial', 'Zero'],
+                datasets: [{
+                    data: [full || 0.001, half || 0.001, zero || 0.001],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderWidth: 4, borderColor: '#fff', hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive:true, maintainAspectRatio:false, cutout:'60%',
+                plugins:{ legend:{ display:false } }
+            }
+        });
+    </script>
+</body>
+</html>

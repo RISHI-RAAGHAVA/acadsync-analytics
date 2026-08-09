@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Login | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{min-height:100vh;font-family:'DM Sans',sans-serif;display:flex;background:#f1f5f9}
+
+        /* ── LEFT: image panel ── */
+        .img-panel{
+            width:420px;flex-shrink:0;position:relative;overflow:hidden;
+            display:flex;flex-direction:column;justify-content:flex-end;
+        }
+        .img-panel img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+        .img-panel-overlay{position:absolute;inset:0;background:linear-gradient(170deg,rgba(37,99,235,.55) 0%,rgba(15,23,42,.82) 100%)}
+        .img-panel-content{position:relative;z-index:2;padding:40px 36px}
+        .ip-logo{display:flex;align-items:center;gap:9px;margin-bottom:auto;padding-top:32px}
+        .ip-ico{width:36px;height:36px;border-radius:9px;background:#fff;display:flex;align-items:center;justify-content:center;color:#2563eb;font-size:.9rem}
+        .ip-nm{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:#fff}
+        .ip-nm span{color:#fbbf24}
+        .ip-text{margin-top:auto}
+        .ip-heading{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:#fff;line-height:1.2;margin-bottom:10px}
+        .ip-heading span{color:#fbbf24}
+        .ip-body{font-size:.82rem;color:rgba(255,255,255,.65);line-height:1.65;margin-bottom:20px}
+        .ip-feat{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+        .ip-feat i{color:#fbbf24;font-size:.72rem;width:14px}
+        .ip-feat span{font-size:.78rem;color:rgba(255,255,255,.75)}
+
+        /* ── RIGHT: form ── */
+        .form-panel{
+            flex:1;display:flex;align-items:center;justify-content:center;
+            padding:40px 32px;background:#fff;
+        }
+        .form-inner{width:100%;max-width:400px}
+
+        .form-title{font-family:'Syne',sans-serif;font-size:1.75rem;font-weight:800;color:#0f172a;margin-bottom:6px}
+        .form-sub{font-size:.88rem;color:#64748b;margin-bottom:32px;line-height:1.5}
+
+        .field{margin-bottom:18px}
+        .field label{display:block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:#64748b;margin-bottom:6px}
+        .fi{position:relative}
+        .fi i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.82rem;pointer-events:none}
+        .fi input{
+            width:100%;padding:12px 14px 12px 38px;
+            background:#f8fafc;border:1.5px solid #e2e8f0;
+            border-radius:10px;font-size:.9rem;font-family:'DM Sans',sans-serif;
+            color:#0f172a;outline:none;transition:.2s
+        }
+        .fi input::placeholder{color:#cbd5e1}
+        .fi input:focus{background:#fff;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+
+        .btn-submit{
+            width:100%;padding:13px;margin-top:4px;
+            background:linear-gradient(135deg,#2563eb,#1d4ed8);
+            border:none;border-radius:10px;cursor:pointer;transition:.2s;
+            font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;color:#fff;
+            box-shadow:0 4px 14px rgba(37,99,235,.35)
+        }
+        .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(37,99,235,.45)}
+
+        .form-footer{margin-top:22px;text-align:center;font-size:.82rem;color:#64748b}
+        .form-footer a{color:#2563eb;text-decoration:none;font-weight:500}
+        .form-footer a:hover{color:#1d4ed8}
+        .form-footer .sep{margin:0 8px;color:#cbd5e1}
+
+        @media(max-width:700px){.img-panel{display:none}.form-panel{background:#f1f5f9}}
+    </style>
+</head>
+<body>
+
+    <!-- LEFT IMAGE PANEL -->
+    <div class="img-panel">
+        <img src="https://images.pexels.com/photos/256490/pexels-photo-256490.jpeg?auto=compress&cs=tinysrgb&w=900" alt="campus">
+        <div class="img-panel-overlay"></div>
+        <div class="ip-logo">
+            <div class="ip-ico"><i class="fa-solid fa-graduation-cap"></i></div>
+            <div class="ip-nm">ACADSYNC <span>TECH</span></div>
+        </div>
+        <div class="img-panel-content">
+            <div class="ip-text">
+                <div class="ip-heading">Welcome back,<br><span>Educator.</span></div>
+                <div class="ip-body">Your complete classroom management portal — attendance, tasks, and performance in one place.</div>
+                <div class="ip-feat"><i class="fa-solid fa-circle-check"></i><span>Real-time attendance tracking</span></div>
+                <div class="ip-feat"><i class="fa-solid fa-circle-check"></i><span>Auto-graded MCQ tasks</span></div>
+                <div class="ip-feat"><i class="fa-solid fa-circle-check"></i><span>Department analytics dashboard</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT FORM PANEL -->
+    <div class="form-panel">
+        <div class="form-inner">
+            <div class="form-title">Staff Login</div>
+            <div class="form-sub">Sign in with your staff ID and password to access your dashboard.</div>
+
+            <form action="/staff/login" method="POST">
+                <div class="field">
+                    <label>Staff ID</label>
+                    <div class="fi">
+                        <i class="fa-solid fa-id-badge"></i>
+                        <input type="text" name="staff_id" placeholder="e.g. VIT1001" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <div class="fi">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-right-to-bracket" style="margin-right:7px"></i>Sign In
+                </button>
+            </form>
+
+            <div class="form-footer">
+                <a href="/staff/register">New staff? Register here</a>
+                <span class="sep">|</span>
+                <a href="/">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

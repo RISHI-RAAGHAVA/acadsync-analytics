@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{min-height:100vh;font-family:'DM Sans',sans-serif;background:#f1f5f9;color:#0f172a}
+
+        /* ── TOPBAR ── */
+        .topbar{
+            background:#fff;border-bottom:1px solid #e2e8f0;
+            display:flex;align-items:center;gap:12px;
+            padding:0 32px;height:60px;position:sticky;top:0;z-index:100;
+        }
+        .tb-logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+        .tb-ico{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem}
+        .tb-nm{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:800;color:#0f172a}
+        .tb-nm span{color:#2563eb}
+        .tb-nav{display:flex;align-items:center;gap:2px;margin-left:24px}
+        .tb-link{
+            padding:6px 13px;border-radius:8px;font-size:.82rem;font-weight:500;
+            color:#64748b;text-decoration:none;transition:.15s;display:flex;align-items:center;gap:6px
+        }
+        .tb-link:hover{background:#f1f5f9;color:#0f172a}
+        .tb-link.active{background:#eff6ff;color:#2563eb;font-weight:600}
+        .tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+        .tb-user{font-size:.82rem;color:#64748b;display:flex;align-items:center;gap:6px}
+        .tb-avatar{width:30px;height:30px;border-radius:8px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:700}
+        .tb-logout{padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;color:#64748b;text-decoration:none;font-size:.8rem;font-weight:500;transition:.15s}
+        .tb-logout:hover{border-color:#ef4444;color:#ef4444;background:#fef2f2}
+
+        /* ── HERO BANNER ── */
+        .hero-banner{
+            background:linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%);
+            margin:24px 32px 0;border-radius:16px;padding:32px 36px;
+            display:flex;align-items:center;justify-content:space-between;gap:20px;
+            position:relative;overflow:hidden;
+        }
+        .hero-banner::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.07)}
+        .hero-banner::after{content:'';position:absolute;bottom:-60px;right:120px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.05)}
+        .hb-left{position:relative;z-index:1}
+        .hb-title{font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:800;color:#fff;margin-bottom:5px}
+        .hb-title span{color:#fbbf24}
+        .hb-sub{font-size:.85rem;color:rgba(255,255,255,.7)}
+        .hb-right{position:relative;z-index:1;display:flex;gap:10px;flex-wrap:wrap}
+        .hb-btn{
+            padding:9px 18px;border-radius:9px;font-size:.82rem;font-weight:600;
+            text-decoration:none;transition:.15s;display:flex;align-items:center;gap:6px
+        }
+        .hb-btn-white{background:#fff;color:#2563eb}
+        .hb-btn-white:hover{background:#eff6ff;color:#1d4ed8}
+        .hb-btn-outline{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3)}
+        .hb-btn-outline:hover{background:rgba(255,255,255,.25);color:#fff}
+
+        /* ── CONTENT ── */
+        .content{padding:24px 32px 48px}
+
+        /* ── KPI ROW ── */
+        .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+        .kpi-card{
+            background:#fff;border:1px solid #e2e8f0;border-radius:13px;
+            padding:18px 18px 14px;position:relative;overflow:hidden;transition:.2s;
+        }
+        .kpi-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(15,23,42,.08)}
+        .kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:13px 13px 0 0}
+        .kc-b::before{background:#2563eb} .kc-g::before{background:#10b981}
+        .kc-a::before{background:#f59e0b} .kc-p::before{background:#8b5cf6}
+        .kpi-label{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#64748b;margin-bottom:8px}
+        .kpi-value{font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;line-height:1;margin-bottom:3px}
+        .kc-b .kpi-value{color:#2563eb} .kc-g .kpi-value{color:#10b981}
+        .kc-a .kpi-value{color:#f59e0b} .kc-p .kpi-value{color:#8b5cf6}
+        .kpi-sub{font-size:.72rem;color:#94a3b8}
+
+        /* ── SECTION LABEL ── */
+        .sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+        .sec-title{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+        .sec-link{font-size:.78rem;color:#2563eb;text-decoration:none;font-weight:500}
+        .sec-link:hover{color:#1d4ed8}
+
+        /* ── NAV CARDS ── */
+        .nav-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+        .nav-card{
+            background:#fff;border:1px solid #e2e8f0;border-radius:14px;
+            padding:24px 20px;text-decoration:none;color:#0f172a;
+            display:flex;flex-direction:column;gap:13px;
+            transition:all .2s;position:relative;overflow:hidden;
+        }
+        .nav-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;opacity:0;transition:.2s}
+        .nc-b::after{background:#2563eb} .nc-g::after{background:#10b981} .nc-a::after{background:#f59e0b}
+        .nav-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(15,23,42,.09)}
+        .nav-card:hover::after{opacity:1}
+        .nc-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+        .ico-b{background:#eff6ff;color:#2563eb} .ico-g{background:#ecfdf5;color:#10b981} .ico-a{background:#fffbeb;color:#f59e0b}
+        .nc-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700}
+        .nc-desc{font-size:.78rem;color:#64748b;line-height:1.55}
+        .nc-action{
+            margin-top:auto;padding:9px 16px;border-radius:8px;border:none;
+            font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;
+            cursor:pointer;text-decoration:none;display:inline-block;text-align:center;transition:.15s
+        }
+        .nc-b .nc-action{background:#2563eb;color:#fff}
+        .nc-b .nc-action:hover{background:#1d4ed8;color:#fff}
+        .nc-g .nc-action{background:#10b981;color:#fff}
+        .nc-g .nc-action:hover{background:#059669;color:#fff}
+        .nc-a .nc-action{background:#f59e0b;color:#fff}
+        .nc-a .nc-action:hover{background:#d97706;color:#fff}
+
+        /* ── INFO GRID ── */
+        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        .panel{background:#fff;border:1px solid #e2e8f0;border-radius:13px;overflow:hidden}
+        .panel-hd{padding:13px 18px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:7px}
+        .ph-dot{width:7px;height:7px;border-radius:50%}
+        .ph-title{font-family:'Syne',sans-serif;font-size:.83rem;font-weight:700;flex:1}
+        .ph-link{font-size:.75rem;color:#2563eb;text-decoration:none;font-weight:500}
+        .panel-body{padding:20px}
+
+        /* tip list */
+        .tip-list{list-style:none;display:flex;flex-direction:column;gap:0}
+        .tip-item{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid #f8fafc}
+        .tip-item:last-child{border-bottom:none;padding-bottom:0}
+        .tip-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0}
+        .tip-body strong{display:block;font-size:.84rem;font-weight:600;margin-bottom:2px}
+        .tip-body span{font-size:.76rem;color:#64748b;line-height:1.5}
+
+        /* info card */
+        .info-rows{display:flex;flex-direction:column;gap:0}
+        .info-row{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid #f8fafc;font-size:.84rem}
+        .info-row:last-child{border-bottom:none;padding-bottom:0}
+        .ir-label{color:#64748b;display:flex;align-items:center;gap:7px;min-width:130px;font-size:.82rem}
+        .ir-label i{font-size:.76rem;width:14px;text-align:center}
+        .ir-value{font-weight:600;color:#0f172a}
+
+        @media(max-width:900px){
+            .kpi-row{grid-template-columns:1fr 1fr}
+            .nav-cards{grid-template-columns:1fr}
+            .info-grid{grid-template-columns:1fr}
+            .topbar{padding:0 16px}
+            .content,.hero-banner{padding:16px;margin:12px 12px 0}
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <a class="tb-logo" href="/student/dashboard">
+        <div class="tb-ico"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="tb-nm">ACADSYNC <span>TECH</span></div>
+    </a>
+    <nav class="tb-nav">
+        <a href="/student/dashboard"       class="tb-link active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        <a href="/student/tasks"           class="tb-link"><i class="fa-solid fa-pen-to-square"></i> Tasks</a>
+        <a href="/student/view_attendance" class="tb-link"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+        <a href="/student/view_scores"     class="tb-link"><i class="fa-solid fa-chart-line"></i> Scores</a>
+    </nav>
+    <div class="tb-right">
+        <div class="tb-user">
+            <div class="tb-avatar">{{ session['student_name'][0] | upper }}</div>
+            <span>{{ session['student_name'] }}</span>
+        </div>
+        <a href="/logout" class="tb-logout"><i class="fa-solid fa-right-from-bracket" style="margin-right:5px"></i>Logout</a>
+    </div>
+</div>
+
+<!-- HERO BANNER -->
+<div class="hero-banner">
+    <div class="hb-left">
+        <div class="hb-title">Hello, <span>{{ session['student_name'].split()[0] }}</span>! 👋</div>
+        <div class="hb-sub">Roll No: {{ session['student'] }} &nbsp;·&nbsp; {{ session['student_dept'] }} Department</div>
+    </div>
+    <div class="hb-right">
+        <a href="/student/tasks"       class="hb-btn hb-btn-white"><i class="fa-solid fa-pen-to-square"></i> My Tasks</a>
+        <a href="/student/view_scores" class="hb-btn hb-btn-outline"><i class="fa-solid fa-chart-line"></i> My Scores</a>
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+    <!-- KPI -->
+    <div class="kpi-row">
+        <div class="kpi-card kc-b">
+            <div class="kpi-label">Roll Number</div>
+            <div class="kpi-value" style="font-size:1.1rem;margin-top:6px">{{ session['student'] }}</div>
+            <div class="kpi-sub">Student ID</div>
+        </div>
+        <div class="kpi-card kc-g">
+            <div class="kpi-label">Department</div>
+            <div class="kpi-value" style="font-size:1.2rem;margin-top:4px">{{ session['student_dept'] }}</div>
+            <div class="kpi-sub">Enrolled dept.</div>
+        </div>
+        <div class="kpi-card kc-a">
+            <div class="kpi-label">Pending Tasks</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub">Activity tasks due</div>
+        </div>
+        <div class="kpi-card kc-p">
+            <div class="kpi-label">Attendance</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-sub">View full report</div>
+        </div>
+    </div>
+
+    <!-- NAV CARDS -->
+    <div class="sec-hd"><div class="sec-title">Your Portal</div></div>
+    <div class="nav-cards">
+        <div class="nav-card nc-b">
+            <div class="nc-icon ico-b"><i class="fa-solid fa-pen-to-square"></i></div>
+            <div>
+                <div class="nc-title">Activity Tasks</div>
+                <div class="nc-desc">View and submit open-ended tasks posted by your staff. Answers are auto-graded instantly.</div>
+            </div>
+            <a href="/student/tasks" class="nc-action">Open Tasks</a>
+        </div>
+        <div class="nav-card nc-g">
+            <div class="nc-icon ico-g"><i class="fa-solid fa-calendar-check"></i></div>
+            <div>
+                <div class="nc-title">Attendance</div>
+                <div class="nc-desc">Monitor your daily attendance percentage. Face recognition marks you present on login.</div>
+            </div>
+            <a href="/student/view_attendance" class="nc-action">View History</a>
+        </div>
+        <div class="nav-card nc-a">
+            <div class="nc-icon ico-a"><i class="fa-solid fa-chart-line"></i></div>
+            <div>
+                <div class="nc-title">Exam Scores</div>
+                <div class="nc-desc">View your task scores, marks earned, and full academic performance summary.</div>
+            </div>
+            <a href="/student/view_scores" class="nc-action">Check Marks</a>
+        </div>
+    </div>
+
+    <!-- INFO GRID -->
+    <div class="info-grid">
+        <!-- Account info -->
+        <div class="panel">
+            <div class="panel-hd">
+                <span class="ph-dot" style="background:#2563eb"></span>
+                <span class="ph-title">Account Details</span>
+            </div>
+            <div class="panel-body">
+                <div class="info-rows">
+                    <div class="info-row">
+                        <div class="ir-label"><i class="fa-solid fa-user" style="color:#2563eb"></i>Name</div>
+                        <div class="ir-value">{{ session['student_name'] }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="ir-label"><i class="fa-solid fa-hashtag" style="color:#8b5cf6"></i>Roll No.</div>
+                        <div class="ir-value" style="font-family:monospace">{{ session['student'] }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="ir-label"><i class="fa-solid fa-building-columns" style="color:#10b981"></i>Department</div>
+                        <div class="ir-value">{{ session['student_dept'] }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="ir-label"><i class="fa-solid fa-calendar" style="color:#f59e0b"></i>Academic Year</div>
+                        <div class="ir-value">2026</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick guide -->
+        <div class="panel">
+            <div class="panel-hd">
+                <span class="ph-dot" style="background:#f59e0b"></span>
+                <span class="ph-title">Quick Guide</span>
+            </div>
+            <div class="panel-body">
+                <ul class="tip-list">
+                    <li class="tip-item">
+                        <div class="tip-ico" style="background:#eff6ff;color:#2563eb"><i class="fa-solid fa-face-smile"></i></div>
+                        <div class="tip-body"><strong>Face Login = Attendance</strong><span>Your attendance is automatically marked each time you log in via face recognition.</span></div>
+                    </li>
+                    <li class="tip-item">
+                        <div class="tip-ico" style="background:#fffbeb;color:#f59e0b"><i class="fa-solid fa-pen-to-square"></i></div>
+                        <div class="tip-body"><strong>Submit Tasks on Time</strong><span>Open the Tasks section to submit activity answers before the deadline.</span></div>
+                    </li>
+                    <li class="tip-item">
+                        <div class="tip-ico" style="background:#fef2f2;color:#ef4444"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="tip-body"><strong>Keep Attendance Above 75%</strong><span>Below 75% attendance may result in academic penalties. Stay regular!</span></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

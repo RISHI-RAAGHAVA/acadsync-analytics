@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tasks | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        body{min-height:100vh;font-family:'DM Sans',sans-serif;background:#f1f5f9;color:#0f172a}
+
+        .topbar{background:#fff;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:10px;padding:0 32px;height:60px;position:sticky;top:0;z-index:100}
+        .tb-logo{display:flex;align-items:center;gap:8px;text-decoration:none}
+        .tb-ico{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.78rem}
+        .tb-nm{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:800;color:#0f172a}
+        .tb-nm span{color:#2563eb}
+        .tb-nav{display:flex;align-items:center;gap:2px;margin-left:20px}
+        .tb-link{padding:6px 12px;border-radius:8px;font-size:.81rem;font-weight:500;color:#64748b;text-decoration:none;transition:.15s;display:flex;align-items:center;gap:5px}
+        .tb-link:hover{background:#f1f5f9;color:#0f172a}
+        .tb-link.active{background:#eff6ff;color:#2563eb;font-weight:600}
+        .tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+        .tb-back{padding:6px 14px;border-radius:8px;border:1.5px solid #e2e8f0;color:#64748b;text-decoration:none;font-size:.8rem;font-weight:500;transition:.15s;display:flex;align-items:center;gap:5px}
+        .tb-back:hover{border-color:#2563eb;color:#2563eb;background:#eff6ff}
+
+        .page-hd{background:#fff;border-bottom:1px solid #e2e8f0;padding:24px 32px}
+        .pg-title{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+        .pg-count{background:#eff6ff;color:#2563eb;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px}
+        .pg-sub{font-size:.84rem;color:#64748b}
+
+        .content{max-width:800px;margin:0 auto;padding:28px 24px 56px}
+
+        .task-card{
+            background:#fff;border:1px solid #e2e8f0;border-radius:14px;
+            overflow:hidden;margin-bottom:16px;
+            box-shadow:0 2px 8px rgba(15,23,42,.04);
+        }
+        .task-head{padding:18px 22px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;gap:13px}
+        .task-icon{width:42px;height:42px;border-radius:11px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+        .task-meta{flex:1;min-width:0}
+        .task-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:7px}
+        .task-badges{display:flex;gap:6px;flex-wrap:wrap}
+        .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;font-size:.68rem;font-weight:600}
+        .badge-b{background:#eff6ff;color:#2563eb}
+        .badge-g{background:#ecfdf5;color:#059669}
+        .badge-s{background:#f8fafc;color:#64748b}
+
+        .task-desc{padding:14px 22px;font-size:.85rem;color:#64748b;line-height:1.65;border-bottom:1px solid #f1f5f9}
+
+        .task-form{padding:16px 22px 18px}
+        .form-lbl{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.9px;color:#64748b;margin-bottom:6px;display:block}
+        .answer-area{
+            width:100%;padding:11px 13px;
+            background:#f8fafc;border:1.5px solid #e2e8f0;
+            border-radius:10px;font-size:.87rem;font-family:'DM Sans',sans-serif;
+            color:#0f172a;outline:none;transition:.2s;resize:vertical;min-height:96px
+        }
+        .answer-area::placeholder{color:#cbd5e1}
+        .answer-area:focus{background:#fff;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+        .form-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:10px}
+        .char-hint{font-size:.72rem;color:#cbd5e1}
+        .btn-submit{
+            padding:9px 20px;background:linear-gradient(135deg,#2563eb,#1d4ed8);
+            border:none;border-radius:9px;font-family:'Syne',sans-serif;
+            font-size:.82rem;font-weight:700;color:#fff;cursor:pointer;transition:.2s;
+            display:flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(37,99,235,.3)
+        }
+        .btn-submit:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(37,99,235,.4)}
+
+        .empty-state{text-align:center;padding:64px 24px;background:#fff;border-radius:14px;border:1px solid #e2e8f0}
+        .empty-icon{font-size:2.5rem;margin-bottom:14px;display:block;opacity:.2}
+        .empty-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:6px}
+        .empty-sub{font-size:.84rem;color:#64748b;margin-bottom:20px;line-height:1.5}
+        .btn-home{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:#2563eb;color:#fff;border-radius:9px;text-decoration:none;font-family:'Syne',sans-serif;font-size:.84rem;font-weight:700;transition:.15s}
+        .btn-home:hover{background:#1d4ed8;color:#fff}
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <a class="tb-logo" href="/student/dashboard">
+        <div class="tb-ico"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="tb-nm">ACADSYNC <span>TECH</span></div>
+    </a>
+    <nav class="tb-nav">
+        <a href="/student/dashboard"       class="tb-link"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        <a href="/student/tasks"           class="tb-link active"><i class="fa-solid fa-pen-to-square"></i> Tasks</a>
+        <a href="/student/view_attendance" class="tb-link"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+        <a href="/student/view_scores"     class="tb-link"><i class="fa-solid fa-chart-line"></i> Scores</a>
+    </nav>
+    <div class="tb-right">
+        <a href="/student/dashboard" class="tb-back"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+    </div>
+</div>
+
+<div class="page-hd">
+    <div class="pg-title">
+        Department Activity Tasks
+        {% if tasks %}<span class="pg-count">{{ tasks | length }} pending</span>{% endif %}
+    </div>
+    <div class="pg-sub">Submit your answers before the deadline — auto-graded by keyword matching.</div>
+</div>
+
+<div class="content">
+    {% if tasks %}
+        {% for task in tasks %}
+        <div class="task-card" style="animation:fadeUp .4s {{ loop.index0 * 0.07 }}s both">
+            <div class="task-head">
+                <div class="task-icon"><i class="fa-solid fa-file-pen"></i></div>
+                <div class="task-meta">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-badges">
+                        <span class="badge badge-b"><i class="fa-solid fa-star"></i> {{ task.total_marks }} marks</span>
+                        <span class="badge badge-s"><i class="fa-solid fa-calendar"></i> {{ task.task_date }}</span>
+                        {% if task.file_name %}
+                        <a href="{{ url_for('static', filename='task_files/' + task.file_name) }}" target="_blank" class="badge badge-g" style="text-decoration:none">
+                            <i class="fa-solid fa-paperclip"></i> View File
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="task-desc">{{ task.description }}</div>
+            <div class="task-form">
+                <form action="/student/submit_answer/{{ task.id }}" method="POST">
+                    <label class="form-lbl">Your Answer</label>
+                    <textarea class="answer-area" name="answer" placeholder="Write your answer here. Be detailed — more keyword matches = higher score." required oninput="updateChar(this,'{{ task.id }}')"></textarea>
+                    <div class="form-footer">
+                        <span class="char-hint" id="char-{{ task.id }}">0 characters</span>
+                        <button type="submit" class="btn-submit"><i class="fa-solid fa-paper-plane"></i> Submit Answer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-check-circle empty-icon" style="color:#10b981"></i>
+            <div class="empty-title">All caught up! 🎉</div>
+            <div class="empty-sub">You have no pending activity tasks right now. Great work staying on top of your submissions!</div>
+            <a href="/student/dashboard" class="btn-home"><i class="fa-solid fa-house"></i> Back to Dashboard</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+</style>
+<script>
+function updateChar(el, id){
+    const n = el.value.length;
+    document.getElementById('char-' + id).textContent = n + ' character' + (n !== 1 ? 's' : '');
+}
+</script>
+</body>
+</html>

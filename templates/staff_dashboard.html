@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --accent:#2563eb; --accent-light:#eff6ff;
+            --green:#10b981;  --green-light:#ecfdf5;
+            --amber:#f59e0b;  --amber-light:#fffbeb;
+            --red:#ef4444;    --red-light:#fef2f2;
+            --purple:#8b5cf6; --teal:#14b8a6;
+            --text:#0f172a;   --muted:#64748b;
+            --bg:#f0f5ff;     --surface:#fff;
+            --border:#e2e8f0;
+        }
+        *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+        body { min-height:100vh; font-family:'DM Sans',sans-serif; color:var(--text); background:var(--bg); }
+
+        /* ── HERO ── */
+        .hero { position:relative; height:280px; overflow:hidden; }
+        .hero-img {
+            position:absolute; inset:0;
+            background:url('https://images.pexels.com/photos/207692/pexels-photo-207692.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat;
+            filter:brightness(.72) saturate(.85);
+            animation:slow 28s ease-in-out infinite alternate;
+        }
+        @keyframes slow{from{transform:scale(1.03)}to{transform:scale(1.07) translateX(-1%)}}
+        .hero-ov { position:absolute;inset:0;background:linear-gradient(180deg,rgba(37,99,235,.2) 0%,rgba(15,23,42,.58) 100%); }
+        .hero-inner { position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between; }
+
+        /* topbar */
+        .topbar { display:flex;align-items:center;gap:14px;padding:17px 36px;background:rgba(255,255,255,.1);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.12); }
+        .tb-brand { display:flex;align-items:center;gap:9px;flex:1;text-decoration:none; }
+        .tb-ico { width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#1d4ed8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;box-shadow:0 3px 10px rgba(37,99,235,.4); }
+        .tb-nm { font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;color:#fff; }
+        .tb-nm span { color:#fbbf24; }
+        .tb-right { display:flex;align-items:center;gap:9px; }
+        .tb-pill { display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:5px 13px;font-size:.76rem;color:#fff; }
+        .tb-pill strong { color:#fff; }
+        .live-dot { width:6px;height:6px;border-radius:50%;background:#34d399;animation:blink 2s infinite; }
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+        .tb-logout { display:flex;align-items:center;gap:6px;padding:5px 13px;border-radius:20px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;font-size:.76rem;text-decoration:none;transition:.2s; }
+        .tb-logout:hover { background:rgba(239,68,68,.25); }
+
+        /* hero text */
+        .hero-txt { padding:20px 36px 26px; }
+        .eyebrow { display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 11px;margin-bottom:10px;font-size:.7rem;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:.5px; }
+        .hero-title { font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;color:#fff;line-height:1.15;margin-bottom:5px;text-shadow:0 2px 10px rgba(0,0,0,.2); }
+        .hero-title span { color:#fbbf24; }
+        .hero-sub { font-size:.85rem;color:rgba(255,255,255,.65); }
+
+        /* ── CONTENT ── */
+        .content { padding:0 36px 60px; max-width:1200px; margin:0 auto; }
+
+        /* KPI strip overlapping hero */
+        .kpi-strip {
+            display:grid; grid-template-columns:repeat(5,1fr); gap:12px;
+            margin-top:-52px; position:relative; z-index:10; margin-bottom:28px;
+        }
+        .kpi-card {
+            background:var(--surface); border:1px solid var(--border); border-radius:13px;
+            padding:15px 16px; box-shadow:0 4px 16px rgba(37,99,235,.07);
+            transition:.2s; position:relative; overflow:hidden;
+        }
+        .kpi-card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(37,99,235,.11); }
+        .kpi-card::after { content:''; position:absolute;top:0;left:0;right:0;height:3px;border-radius:13px 13px 0 0; }
+        .kc-blue::after   { background:var(--accent); }
+        .kc-green::after  { background:var(--green); }
+        .kc-red::after    { background:var(--red); }
+        .kc-amber::after  { background:var(--amber); }
+        .kc-purple::after { background:var(--purple); }
+        .kpi-ico { width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;margin-bottom:10px; }
+        .kc-blue   .kpi-ico { background:var(--accent-light);  color:var(--accent); }
+        .kc-green  .kpi-ico { background:var(--green-light);   color:var(--green); }
+        .kc-red    .kpi-ico { background:var(--red-light);     color:var(--red); }
+        .kc-amber  .kpi-ico { background:var(--amber-light);   color:var(--amber); }
+        .kc-purple .kpi-ico { background:rgba(139,92,246,.1);  color:var(--purple); }
+        .kpi-val { font-family:'Syne',sans-serif;font-size:1.65rem;font-weight:800;line-height:1;margin-bottom:3px; }
+        .kc-blue   .kpi-val { color:var(--accent); }
+        .kc-green  .kpi-val { color:var(--green); }
+        .kc-red    .kpi-val { color:var(--red); }
+        .kc-amber  .kpi-val { color:var(--amber); }
+        .kc-purple .kpi-val { color:var(--purple); }
+        .kpi-lbl { font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-weight:600; }
+
+        /* ── SECTION TITLE ── */
+        .sec-title { font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px;display:flex;align-items:center;gap:7px; }
+        .sec-title::after { content:'';flex:1;height:1px;background:var(--border); }
+
+        /* ── CHART GRIDS ── */
+        .grid-2 { display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px; }
+        .grid-3 { display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px; }
+        .grid-2b { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px; }
+
+        /* ── PANEL ── */
+        .panel { background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(15,23,42,.04); }
+        .panel-hd { padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+        .panel-title { font-family:'Syne',sans-serif;font-size:.84rem;font-weight:700;display:flex;align-items:center;gap:7px; }
+        .pt-dot { width:7px;height:7px;border-radius:50%; }
+        .panel-body { padding:18px; }
+        .chart-wrap { position:relative;width:100%; }
+
+        /* ── ACTION CARDS ── */
+        .cards-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px; }
+        .ac {
+            background:var(--surface);border:1px solid var(--border);border-radius:14px;
+            padding:20px 18px;text-decoration:none;color:var(--text);
+            display:flex;align-items:center;gap:13px;
+            transition:all .2s; position:relative; overflow:hidden;
+        }
+        .ac::before { content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;opacity:0;transition:.2s; }
+        .ac.ca::before{background:var(--amber);}
+        .ac.cb::before{background:var(--accent);}
+        .ac.cg::before{background:var(--green);}
+        .ac.cp::before{background:var(--purple);}
+        .ac.ct::before{background:var(--teal);}
+        .ac.cr::before{background:var(--red);}
+        .ac:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(15,23,42,.09);}
+        .ac:hover::before{opacity:1;}
+        .ac-ico { width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;transition:.2s; }
+        .ac:hover .ac-ico { transform:scale(1.08); }
+        .ico-a{background:var(--amber-light);color:var(--amber);}
+        .ico-b{background:var(--accent-light);color:var(--accent);}
+        .ico-g{background:var(--green-light);color:var(--green);}
+        .ico-p{background:rgba(139,92,246,.1);color:var(--purple);}
+        .ico-t{background:rgba(20,184,166,.1);color:var(--teal);}
+        .ico-r{background:var(--red-light);color:var(--red);}
+        .ac-info { flex:1;min-width:0; }
+        .ac-title { font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700; }
+        .ac-desc { font-size:.72rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .ac-arrow { color:#cbd5e1;font-size:.78rem;transition:.2s; }
+        .ac:hover .ac-arrow { color:var(--accent); }
+
+        /* ── TOP STUDENTS ── */
+        .rank-item { display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid #f1f5f9; }
+        .rank-item:last-child { border-bottom:none; }
+        .rk-num { width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;flex-shrink:0; }
+        .rk-1{background:#fef3c7;color:#b45309;}
+        .rk-2{background:#f1f5f9;color:var(--muted);}
+        .rk-3{background:#fce7f3;color:#be185d;}
+        .rk-x{background:var(--bg);color:var(--muted);}
+        .rk-info { flex:1; }
+        .rk-name { font-size:.8rem;font-weight:700; }
+        .rk-roll { font-size:.68rem;color:var(--muted);font-family:'JetBrains Mono',monospace; }
+        .rk-score { font-family:'JetBrains Mono',monospace;font-size:.86rem;font-weight:700;color:var(--accent); }
+
+        /* ── ATTENDANCE MINI-DONUT CENTER ── */
+        .donut-center { position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none; }
+        .donut-val { font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--green);line-height:1; }
+        .donut-sub { font-size:.65rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px; }
+
+        @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+        .fu{animation:up .42s both;}
+        .d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}
+        .d4{animation-delay:.2s}.d5{animation-delay:.25s}
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-img"></div>
+    <div class="hero-ov"></div>
+    <div class="hero-inner">
+        <div class="topbar">
+            <a class="tb-brand" href="/staff_dashboard">
+                <div class="tb-ico"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div class="tb-nm">ACADSYNC <span>TECH</span></div>
+            </a>
+            <div class="tb-right">
+                <div class="tb-pill">
+                    <div class="live-dot"></div>
+                    <span><strong>{{ session['staff_name'] }}</strong> · {{ session['staff_id'] }}</span>
+                </div>
+                <a href="/logout" class="tb-logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+        </div>
+        <div class="hero-txt">
+            <div class="eyebrow"><i class="fa-solid fa-circle-dot"></i> Staff Portal</div>
+            <div class="hero-title">Good day, <span>{{ session['staff_name'].split()[0] }}</span>.<br>Your classroom awaits.</div>
+            <div class="hero-sub">{{ session['staff_dept'] }} Department · {{ today }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+        <div class="kpi-card kc-blue fu d1">
+            <div class="kpi-ico"><i class="fa-solid fa-users"></i></div>
+            <div class="kpi-val">{{ total_students }}</div>
+            <div class="kpi-lbl">Total Students</div>
+        </div>
+        <div class="kpi-card kc-green fu d2">
+            <div class="kpi-ico"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="kpi-val">{{ present_today }}</div>
+            <div class="kpi-lbl">Present Today</div>
+        </div>
+        <div class="kpi-card kc-red fu d3">
+            <div class="kpi-ico"><i class="fa-solid fa-calendar-xmark"></i></div>
+            <div class="kpi-val">{{ absent_today }}</div>
+            <div class="kpi-lbl">Absent Today</div>
+        </div>
+        <div class="kpi-card kc-amber fu d4">
+            <div class="kpi-ico"><i class="fa-solid fa-circle-question"></i></div>
+            <div class="kpi-val">{{ total_mcq }}</div>
+            <div class="kpi-lbl">MCQ Tasks</div>
+        </div>
+        <div class="kpi-card kc-purple fu d5">
+            <div class="kpi-ico"><i class="fa-solid fa-pen-to-square"></i></div>
+            <div class="kpi-val">{{ total_tasks }}</div>
+            <div class="kpi-lbl">Activity Tasks</div>
+        </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="sec-title">Quick Actions</div>
+    <div class="cards-grid fu">
+        <a href="/staff/add_student" class="ac ca">
+            <div class="ac-ico ico-a"><i class="fa-solid fa-user-plus"></i></div>
+            <div class="ac-info"><div class="ac-title">Add Student</div><div class="ac-desc">Register with face capture</div></div>
+            <i class="fa-solid fa-arrow-right ac-arrow"></i>
+        </a>
+        <a href="/staff/add_activity_task" class="ac cg">
+            <div class="ac-ico ico-g"><i class="fa-solid fa-pen-to-square"></i></div>
+            <div class="ac-info"><div class="ac-title">Activity Task</div><div class="ac-desc">Open-ended auto-graded</div></div>
+            <i class="fa-solid fa-arrow-right ac-arrow"></i>
+        </a>
+        <a href="/staff/view_attendance" class="ac cp">
+            <div class="ac-ico ico-p"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="ac-info"><div class="ac-title">Attendance</div><div class="ac-desc">View daily records</div></div>
+            <i class="fa-solid fa-arrow-right ac-arrow"></i>
+        </a>
+        <a href="/staff/view_scores" class="ac ct">
+            <div class="ac-ico ico-t"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="ac-info"><div class="ac-title">Student Scores</div><div class="ac-desc">Performance reports</div></div>
+            <i class="fa-solid fa-arrow-right ac-arrow"></i>
+        </a>
+        <a href="/logout" class="ac cr">
+            <div class="ac-ico ico-r"><i class="fa-solid fa-right-from-bracket"></i></div>
+            <div class="ac-info"><div class="ac-title">Logout</div><div class="ac-desc">End your session</div></div>
+            <i class="fa-solid fa-arrow-right ac-arrow"></i>
+        </a>
+    </div>
+
+    <!-- ROW 1: Weekly bar + Today donut -->
+    <div class="sec-title">Analytics</div>
+    <div class="grid-2 fu">
+        <div class="panel">
+            <div class="panel-hd">
+                <div class="panel-title"><span class="pt-dot" style="background:var(--accent)"></span>Weekly Attendance</div>
+                <span style="font-size:.72rem;color:var(--muted);">Last 7 days</span>
+            </div>
+            <div class="panel-body">
+                <div class="chart-wrap" style="height:220px;">
+                    <canvas id="cWeekly"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-hd">
+                <div class="panel-title"><span class="pt-dot" style="background:var(--green)"></span>Today's Status</div>
+                <span style="font-size:.72rem;color:var(--muted);">{{ today }}</span>
+            </div>
+            <div class="panel-body" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                <div style="position:relative;width:100%;height:180px;">
+                    <canvas id="cDonut"></canvas>
+                    <div class="donut-center">
+                        <div class="donut-val">{{ present_today }}</div>
+                        <div class="donut-sub">Present</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:16px;font-size:.74rem;font-weight:600;">
+                    <span><span style="color:var(--green);">■</span> Present {{ present_today }}</span>
+                    <span><span style="color:var(--red);">■</span> Absent {{ absent_today }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 2: Monthly trend + Score dist + Task polar -->
+    <div class="grid-3 fu">
+        <div class="panel">
+            <div class="panel-hd">
+                <div class="panel-title"><span class="pt-dot" style="background:var(--purple)"></span>Monthly Attendance</div>
+            </div>
+            <div class="panel-body">
+                <div class="chart-wrap" style="height:190px;">
+                    <canvas id="cMonthly"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-hd">
+                <div class="panel-title"><span class="pt-dot" style="background:var(--amber)"></span>Score Distribution</div>
+            </div>
+            <div class="panel-body">
+                <div class="chart-wrap" style="height:190px;">
+                    <canvas id="cScoreDist"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-hd">
+                <div class="panel-title"><span class="pt-dot" style="background:var(--teal)"></span>Task Types</div>
+            </div>
+            <div class="panel-body">
+                <div class="chart-wrap" style="height:190px;">
+                    <canvas id="cTaskPolar"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROW 3: Top students + Attendance trend line -->
+    <div class="grid-2b fu">
+        <div class="panel">
+            <div class="panel-hd">
+                <div class="panel-title"><span class="pt-dot" style="background:var(--amber)"></span>Top Performers</div>
+            </div>
+            {% set rk_cls = ['rk-1','rk-2','rk-3','rk-x','rk-x'] %}
+            {% for s in top_students %}
+            <div class="rank-item">
+                <div class="rk-num {{ rk_cls[loop.index0] }}">{{ loop.index }}</div>
+                <div class="rk-info">
+                    <div class="rk-name">{{ s.name }}</div>
+                    <div class="rk-roll">{{ s.roll_no }}</div>
+                </div>
+                <div class="rk-score">{{ s.total_score }}</div>
+            </div>
+            {% else %}
+            <div style="padding:30px;text-align:center;color:var(--muted);font-size:.82rem;">
+                <i class="fa-solid fa-chart-bar" style="display:block;opacity:.2;font-size:1.5rem;margin-bottom:8px;"></i>
+                No submission data yet
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="panel">
+            <div class="panel-hd">
+                <div class="panel-title"><span class="pt-dot" style="background:var(--accent)"></span>6-Month Attendance Trend</div>
+            </div>
+            <div class="panel-body">
+                <div class="chart-wrap" style="height:200px;">
+                    <canvas id="cTrend"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /content -->
+
+<script>
+Chart.defaults.font.family = 'DM Sans';
+Chart.defaults.font.size   = 11;
+Chart.defaults.color       = '#64748b';
+
+const WEEKLY_LABELS  = {{ weekly_labels  | tojson }};
+const WEEKLY_PRESENT = {{ weekly_present | tojson }};
+const WEEKLY_ABSENT  = {{ weekly_absent  | tojson }};
+const MONTHLY_LABELS = {{ monthly_labels | tojson }};
+const MONTHLY_PCT    = {{ monthly_pct    | tojson }};
+const SCORE_LABELS   = {{ score_labels   | tojson }};
+const SCORE_DIST     = {{ score_dist     | tojson }};
+const PRESENT_TODAY  = {{ present_today }};
+const ABSENT_TODAY   = {{ absent_today }};
+const TOTAL_MCQ      = {{ total_mcq }};
+const TOTAL_TASKS    = {{ total_tasks }};
+
+const GX = { color:'#f1f5f9' };
+const SX = { grid:{display:false} };
+const SY = { beginAtZero:true, grid:GX };
+
+function ctx(id){ return document.getElementById(id).getContext('2d'); }
+
+// 1. Weekly grouped bar
+new Chart(ctx('cWeekly'), {
+    type: 'bar',
+    data: {
+        labels: WEEKLY_LABELS,
+        datasets: [
+            { label:'Present', data:WEEKLY_PRESENT, backgroundColor:'rgba(16,185,129,.75)', borderRadius:5, barThickness:18 },
+            { label:'Absent',  data:WEEKLY_ABSENT,  backgroundColor:'rgba(239,68,68,.6)',   borderRadius:5, barThickness:18 }
+        ]
+    },
+    options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ position:'top', labels:{ boxWidth:10, padding:14 } } },
+        scales:{ y:SY, x:SX }
+    }
+});
+
+// 2. Today donut
+new Chart(ctx('cDonut'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Present','Absent'],
+        datasets: [{ data:[PRESENT_TODAY, ABSENT_TODAY], backgroundColor:['#10b981','#ef4444'], borderWidth:0, hoverOffset:6 }]
+    },
+    options: {
+        responsive:true, maintainAspectRatio:false, cutout:'72%',
+        plugins:{ legend:{ display:false } }
+    }
+});
+
+// 3. Monthly line
+new Chart(ctx('cMonthly'), {
+    type: 'line',
+    data: {
+        labels: MONTHLY_LABELS,
+        datasets: [{
+            label:'Attendance %',
+            data: MONTHLY_PCT,
+            borderColor:'#8b5cf6',
+            backgroundColor:'rgba(139,92,246,.08)',
+            fill:true, tension:.4, pointRadius:4,
+            pointBackgroundColor:'#8b5cf6'
+        }]
+    },
+    options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales: {
+            y:{ beginAtZero:false, min:0, max:100, grid:GX },
+            x:SX
+        }
+    }
+});
+
+// 4. Score distribution bar
+new Chart(ctx('cScoreDist'), {
+    type: 'bar',
+    data: {
+        labels: SCORE_LABELS,
+        datasets: [{
+            label:'Students',
+            data: SCORE_DIST,
+            backgroundColor:['rgba(239,68,68,.7)','rgba(245,158,11,.7)','rgba(37,99,235,.7)','rgba(16,185,129,.7)'],
+            borderRadius:6, barThickness:32
+        }]
+    },
+    options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales:{ y:{ ...SY, ticks:{ stepSize:1 } }, x:SX }
+    }
+});
+
+// 5. Task types polar
+new Chart(ctx('cTaskPolar'), {
+    type: 'doughnut',
+    data: {
+        labels: ['MCQ Tasks','Activity Tasks'],
+        datasets: [{
+            data: [TOTAL_MCQ || 1, TOTAL_TASKS || 1],
+            backgroundColor:['rgba(245,158,11,.8)','rgba(20,184,166,.8)'],
+            borderWidth:3, borderColor:'#fff', hoverOffset:8
+        }]
+    },
+    options: {
+        responsive:true, maintainAspectRatio:false, cutout:'55%',
+        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:12 } } }
+    }
+});
+
+// 6. 6-month trend area
+new Chart(ctx('cTrend'), {
+    type: 'line',
+    data: {
+        labels: MONTHLY_LABELS,
+        datasets: [{
+            label:'Attendance %',
+            data: MONTHLY_PCT,
+            borderColor:'#2563eb',
+            backgroundColor:'rgba(37,99,235,.07)',
+            fill:true, tension:.4, pointRadius:5,
+            pointBackgroundColor:'#2563eb',
+            pointBorderColor:'#fff', pointBorderWidth:2
+        }]
+    },
+    options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales: {
+            y:{ beginAtZero:false, min:0, max:100, grid:GX },
+            x:SX
+        }
+    }
+});
+</script>
+</body>
+</html>

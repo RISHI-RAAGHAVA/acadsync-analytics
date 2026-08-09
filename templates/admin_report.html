@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Report | ACADSYNC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --accent:       #2563eb;
+            --accent-light: #eff6ff;
+            --green:        #10b981;
+            --amber:        #f59e0b;
+            --red:          #ef4444;
+            --purple:       #8b5cf6;
+            --bg:           #f1f5fb;
+            --surface:      #ffffff;
+            --border:       #e2e8f0;
+            --text:         #0f172a;
+            --muted:        #64748b;
+            --sidebar-w:    240px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+        /* ── SIDEBAR (identical to dashboard) ── */
+        .sidebar {
+            width: var(--sidebar-w); background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            position: fixed; inset: 0 auto 0 0;
+            z-index: 200; overflow-y: auto;
+        }
+        .sb-brand {
+            padding: 22px 18px 18px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 10px; text-decoration: none;
+        }
+        .sb-icon { width: 36px; height: 36px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: .9rem; flex-shrink: 0; }
+        .sb-name { font-size: 1rem; font-weight: 800; color: var(--text); }
+        .sb-name span { color: var(--accent); }
+        .sb-sub { font-size: .6rem; color: var(--muted); margin-top: 1px; }
+        .sb-nav { padding: 12px 10px; flex: 1; }
+        .sb-section { font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.4px; color: var(--muted); padding: 10px 8px 5px; }
+        .sb-item {
+            display: flex; align-items: center; gap: 9px;
+            padding: 9px 10px; border-radius: 9px;
+            font-size: .84rem; font-weight: 500;
+            color: var(--muted); text-decoration: none;
+            transition: all .18s; margin-bottom: 1px;
+        }
+        .sb-item i { width: 16px; text-align: center; font-size: .82rem; }
+        .sb-item:hover { background: var(--accent-light); color: var(--accent); }
+        .sb-item.active { background: var(--accent); color: #fff; box-shadow: 0 3px 10px rgba(37,99,235,.28); }
+        .sb-footer { padding: 12px; border-top: 1px solid var(--border); }
+        .sb-user { display: flex; align-items: center; gap: 9px; background: var(--accent-light); padding: 9px 11px; border-radius: 10px; }
+        .sb-avatar { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .8rem; flex-shrink: 0; }
+        .sb-uname { font-size: .8rem; font-weight: 700; }
+        .sb-urole { font-size: .67rem; color: var(--muted); }
+
+        /* ── MAIN ── */
+        .main-wrap { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* ── TOPBAR ── */
+        .topbar { height: 60px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 10px; position: sticky; top: 0; z-index: 100; }
+        .topbar-title { font-size: 1rem; font-weight: 700; flex: 1; }
+        .topbar-title span { color: var(--muted); font-weight: 400; font-size: .88rem; }
+        .tb-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--muted); cursor: pointer; transition: .18s; text-decoration: none; font-size: .8rem; }
+        .tb-btn:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+
+        /* ── CONTENT ── */
+        .content { padding: 22px 24px; flex: 1; }
+
+        /* ── BANNER ── */
+        .banner {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 55%, #2563eb 100%);
+            border-radius: 16px; padding: 32px 36px;
+            margin-bottom: 20px; position: relative; overflow: hidden;
+        }
+        .banner::before { content: ''; position: absolute; top: -50px; right: -50px; width: 220px; height: 220px; background: rgba(255,255,255,.06); border-radius: 50%; }
+        .banner::after  { content: ''; position: absolute; bottom: -70px; right: 120px; width: 260px; height: 260px; background: rgba(255,255,255,.04); border-radius: 50%; }
+        .banner-inner { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+        .banner-inner h1 { font-size: 1.65rem; font-weight: 800; color: #fff; letter-spacing: -.4px; margin-bottom: 5px; }
+        .banner-inner p { color: rgba(255,255,255,.7); font-size: .88rem; margin-bottom: 12px; }
+        .b-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+        .b-chip { background: rgba(255,255,255,.15); color: #fff; padding: 4px 11px; border-radius: 20px; font-size: .72rem; font-weight: 600; border: 1px solid rgba(255,255,255,.2); }
+        .btn-banner { background: #fff; color: var(--accent); font-weight: 700; border: none; padding: 11px 20px; border-radius: 9px; font-family: 'Outfit', sans-serif; font-size: .83rem; cursor: pointer; transition: .2s; text-decoration: none; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .btn-banner:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,.18); color: var(--accent); }
+
+        /* ── FILTER BAR ── */
+        .filter-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; padding: 11px 18px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .fl-label { font-size: .67rem; font-weight: 800; text-transform: uppercase; letter-spacing: .9px; color: var(--muted); }
+        .fl-chip { padding: 5px 13px; border-radius: 20px; font-size: .77rem; font-weight: 600; border: 1.5px solid var(--border); background: var(--bg); color: var(--muted); cursor: pointer; transition: .18s; font-family: 'Outfit', sans-serif; }
+        .fl-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .fl-chip.on { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 2px 8px rgba(37,99,235,.25); }
+        .fl-div { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+        .live-row { margin-left: auto; display: flex; align-items: center; gap: 5px; font-size: .72rem; color: var(--muted); }
+        .live-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: blink 2s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        /* ── KPI ROW ── */
+        .kpi-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 13px; margin-bottom: 20px; }
+        .kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; padding: 16px 16px 13px; position: relative; overflow: hidden; transition: transform .2s, box-shadow .2s; }
+        .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(37,99,235,.09); }
+        .kpi-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 13px 13px 0 0; }
+        .kpi-card.c1::after { background: var(--accent); }
+        .kpi-card.c2::after { background: var(--green); }
+        .kpi-card.c3::after { background: var(--amber); }
+        .kpi-card.c4::after { background: var(--red); }
+        .kpi-card.c5::after { background: var(--purple); }
+        .kpi-ico { position: absolute; top: 14px; right: 14px; width: 33px; height: 33px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .86rem; }
+        .c1 .kpi-ico { background: rgba(37,99,235,.1);  color: var(--accent); }
+        .c2 .kpi-ico { background: rgba(16,185,129,.1); color: var(--green); }
+        .c3 .kpi-ico { background: rgba(245,158,11,.1); color: var(--amber); }
+        .c4 .kpi-ico { background: rgba(239,68,68,.1);  color: var(--red); }
+        .c5 .kpi-ico { background: rgba(139,92,246,.1); color: var(--purple); }
+        .kpi-lbl { font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .9px; color: var(--muted); margin-bottom: 7px; }
+        .kpi-num { font-size: 1.65rem; font-weight: 800; letter-spacing: -1px; line-height: 1; margin-bottom: 4px; }
+        .c1 .kpi-num { color: var(--accent); }
+        .c2 .kpi-num { color: var(--green); }
+        .c3 .kpi-num { color: var(--amber); }
+        .c4 .kpi-num { color: var(--red); }
+        .c5 .kpi-num { color: var(--purple); }
+        .kpi-sub { font-size: .68rem; color: var(--muted); }
+
+        /* ── CHART PANELS ── */
+        .row-2col { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .row-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+        .row-2col2 { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-bottom: 14px; }
+
+        .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 13px; overflow: hidden; }
+        .panel-hd { padding: 13px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .panel-title { font-size: .86rem; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+        .ptdot { width: 8px; height: 8px; border-radius: 50%; }
+        .panel-body { padding: 18px; }
+        /* Give every chart canvas a fixed height container */
+        .chart-wrap { position: relative; width: 100%; }
+        .chart-wrap canvas { display: block !important; }
+
+        /* tab buttons */
+        .p-tabs { display: flex; gap: 3px; }
+        .ptab { padding: 4px 10px; border-radius: 6px; font-size: .7rem; font-weight: 600; cursor: pointer; color: var(--muted); transition: .18s; border: none; background: none; font-family: 'Outfit', sans-serif; }
+        .ptab:hover, .ptab.on { background: var(--accent-light); color: var(--accent); }
+
+        /* ── TABLE ── */
+        .tbl { width: 100%; border-collapse: collapse; }
+        .tbl thead tr { background: #f8fafc; }
+        .tbl th { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); padding: 10px 16px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .tbl td { padding: 11px 16px; font-size: .82rem; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .tbl tbody tr { transition: background .13s; }
+        .tbl tbody tr:hover { background: #f8fafc; }
+        .tbl tbody tr:last-child td { border-bottom: none; }
+
+        .dept-pill { font-size: .71rem; font-weight: 600; padding: 3px 9px; border-radius: 6px; }
+        .dp-cse   { background: rgba(37,99,235,.1);  color: var(--accent); }
+        .dp-ece   { background: rgba(245,158,11,.1); color: var(--amber); }
+        .dp-mech  { background: rgba(16,185,129,.1); color: var(--green); }
+        .dp-other { background: #f1f5f9; color: var(--muted); }
+
+        .perf-cell { display: flex; align-items: center; gap: 7px; }
+        .perf-bar { flex: 1; height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+        .perf-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+        .perf-pct { font-size: .73rem; font-weight: 700; min-width: 34px; text-align: right; color: var(--muted); }
+
+        .trend { font-size: .76rem; font-weight: 700; }
+        .trend.up   { color: var(--green); }
+        .trend.down { color: var(--red); }
+
+        /* ── RANK LIST ── */
+        .rank-list { list-style: none; }
+        .rank-item { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid #f1f5f9; }
+        .rank-item:last-child { border-bottom: none; }
+        .rank-num { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: .7rem; font-weight: 800; flex-shrink: 0; }
+        .rn-1 { background: #fef3c7; color: #b45309; }
+        .rn-2 { background: #f1f5f9; color: var(--muted); }
+        .rn-3 { background: #fce7f3; color: #be185d; }
+        .rn-x { background: var(--bg); color: var(--muted); }
+        .rank-info { flex: 1; }
+        .rank-name { font-size: .8rem; font-weight: 700; }
+        .rank-dept { font-size: .68rem; color: var(--muted); }
+        .rank-score { font-size: .88rem; font-weight: 800; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes up { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        .fu { animation: up .42s both; }
+        .d1{animation-delay:.04s} .d2{animation-delay:.08s} .d3{animation-delay:.12s}
+        .d4{animation-delay:.16s} .d5{animation-delay:.2s}  .d6{animation-delay:.24s}
+        .d7{animation-delay:.28s} .d8{animation-delay:.32s} .d9{animation-delay:.36s}
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+    <a class="sb-brand" href="/admin/dashboard">
+        <div class="sb-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div>
+            <div class="sb-name">ACADSYNC <span>TECH</span></div>
+            <div class="sb-sub">Admin Portal</div>
+        </div>
+    </a>
+    <nav class="sb-nav">
+        <div class="sb-section">Main</div>
+        <a href="/admin/dashboard" class="sb-item">
+            <i class="fa-solid fa-gauge-high"></i> Dashboard
+        </a>
+        <a href="/admin/global_report" class="sb-item active">
+            <i class="fa-solid fa-chart-line"></i> Analytics
+        </a>
+        <div class="sb-section" style="margin-top:10px;">Management</div>
+        <a href="#" class="sb-item"><i class="fa-solid fa-users"></i> Staff</a>
+        <a href="#" class="sb-item"><i class="fa-solid fa-user-graduate"></i> Students</a>
+        <a href="#" class="sb-item"><i class="fa-solid fa-building-columns"></i> Departments</a>
+        <a href="#" class="sb-item"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
+        <a href="#" class="sb-item"><i class="fa-solid fa-clipboard-list"></i> Tasks</a>
+        <div class="sb-section" style="margin-top:10px;">System</div>
+        <a href="#" class="sb-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        <a href="/logout" class="sb-item" style="color:var(--red) !important;">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+    </nav>
+    <div class="sb-footer">
+        <div class="sb-user">
+            <div class="sb-avatar">MA</div>
+            <div>
+                <div class="sb-uname">Master Admin</div>
+                <div class="sb-urole">Super Administrator</div>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main-wrap">
+
+    <div class="topbar">
+        <div class="topbar-title">Analytics <span>/ Global Performance Report</span></div>
+        <div class="tb-btn" title="Export PDF"><i class="fa-solid fa-download"></i></div>
+        <a href="/admin/dashboard" class="tb-btn" title="Dashboard"><i class="fa-solid fa-gauge-high"></i></a>
+    </div>
+
+    <div class="content">
+
+        <!-- BANNER -->
+        <div class="banner fu">
+            <div class="banner-inner">
+                <div>
+                    <h1><i class="fa-solid fa-chart-pie" style="margin-right:10px;font-size:1.3rem;"></i>ACADSYNC</h1>
+                    <p>Institutional Performance &amp; Academic Analytics — 2026</p>
+                    <div class="b-chips">
+                        <span class="b-chip"><i class="fa-solid fa-circle-dot" style="margin-right:4px;"></i>Live Data</span>
+                        <span class="b-chip"><i class="fa-solid fa-calendar" style="margin-right:4px;"></i>2026 Academic Year</span>
+                        <span class="b-chip"><i class="fa-solid fa-building" style="margin-right:4px;"></i>3 Departments</span>
+                    </div>
+                </div>
+                <a href="/admin/dashboard" class="btn-banner">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar fu d1">
+            <span class="fl-label"><i class="fa-solid fa-sliders" style="margin-right:4px;"></i>Dept</span>
+            <button class="fl-chip on" data-group="dept" data-val="All"  onclick="handleChip(this)">All</button>
+            <button class="fl-chip"    data-group="dept" data-val="CSE"  onclick="handleChip(this)">CSE</button>
+            <button class="fl-chip"    data-group="dept" data-val="ECE"  onclick="handleChip(this)">ECE</button>
+            <button class="fl-chip"    data-group="dept" data-val="MECH" onclick="handleChip(this)">MECH</button>
+            <div class="fl-div"></div>
+            <span class="fl-label">Period</span>
+            <button class="fl-chip on" data-group="period" data-val="semester" onclick="handleChip(this)">Semester</button>
+            <button class="fl-chip"    data-group="period" data-val="annual"   onclick="handleChip(this)">Annual</button>
+            <div class="live-row"><div class="live-dot"></div> Live data</div>
+        </div>
+
+        <!-- KPI ROW -->
+        <div class="kpi-row">
+            <div class="kpi-card c1 fu d2">
+                <div class="kpi-ico"><i class="fa-solid fa-user-graduate"></i></div>
+                <div class="kpi-lbl">Total Students</div>
+                <div class="kpi-num">{{ total_students }}</div>
+                <div class="kpi-sub">Enrolled this semester</div>
+            </div>
+            <div class="kpi-card c2 fu d3">
+                <div class="kpi-ico"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="kpi-lbl">Avg Attendance</div>
+                <div class="kpi-num">{{ avg_attendance }}%</div>
+                <div class="kpi-sub">All departments</div>
+            </div>
+            <div class="kpi-card c3 fu d4">
+                <div class="kpi-ico"><i class="fa-solid fa-star"></i></div>
+                <div class="kpi-lbl">Avg Score</div>
+                <div class="kpi-num">{{ overall_avg_score }}%</div>
+                <div class="kpi-sub">Academic performance</div>
+            </div>
+            <div class="kpi-card c4 fu d5">
+                <div class="kpi-ico"><i class="fa-solid fa-list-check"></i></div>
+                <div class="kpi-lbl">Total Tasks</div>
+                <div class="kpi-num">{{ total_tasks }}</div>
+                <div class="kpi-sub">Posted evaluations</div>
+            </div>
+            <div class="kpi-card c5 fu d6">
+                <div class="kpi-ico"><i class="fa-solid fa-users-gear"></i></div>
+                <div class="kpi-lbl">Staff Verified</div>
+                <div class="kpi-num">{{ total_staff_verified }}</div>
+                <div class="kpi-sub">Active instructors</div>
+            </div>
+        </div>
+
+        <!-- ROW 1: Score Bar + Attendance Donut -->
+        <div class="row-2col fu d3">
+            <div class="panel">
+                <div class="panel-hd">
+                    <div class="panel-title"><span class="ptdot" style="background:var(--accent)"></span> Dept. Score Comparison</div>
+                    <div class="p-tabs">
+                        <button class="ptab on" onclick="switchScore('bar',this)">Bar</button>
+                        <button class="ptab"    onclick="switchScore('line',this)">Line</button>
+                        <button class="ptab"    onclick="switchScore('radar',this)">Radar</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-wrap" style="height:220px;">
+                        <canvas id="cScore"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-hd">
+                    <div class="panel-title"><span class="ptdot" style="background:var(--green)"></span> Attendance Split</div>
+                </div>
+                <div class="panel-body" style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                    <div class="chart-wrap" style="height:200px;width:100%;">
+                        <canvas id="cDonut"></canvas>
+                    </div>
+                    <div style="display:flex;gap:14px;font-size:.74rem;font-weight:600;">
+                        <span><span style="color:var(--green);">■</span> Present {{ avg_attendance }}%</span>
+                        <span><span style="color:#e2e8f0;">■</span> Absent {{ 100 - avg_attendance }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 2: 3 charts -->
+        <div class="row-3col fu d4">
+            <div class="panel">
+                <div class="panel-hd">
+                    <div class="panel-title"><span class="ptdot" style="background:var(--amber)"></span> Student Distribution</div>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-wrap" style="height:200px;">
+                        <canvas id="cPie"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-hd">
+                    <div class="panel-title"><span class="ptdot" style="background:var(--purple)"></span> Monthly Attendance</div>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-wrap" style="height:200px;">
+                        <canvas id="cLine"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-hd">
+                    <div class="panel-title"><span class="ptdot" style="background:var(--red)"></span> Task Completion</div>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-wrap" style="height:200px;">
+                        <canvas id="cPolar"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 3: Rankings + Grouped bar -->
+        <div class="row-2col2 fu d5">
+            <div class="panel">
+                <div class="panel-hd">
+                    <div class="panel-title"><span class="ptdot" style="background:var(--amber)"></span> Top Performers</div>
+                </div>
+                <ul class="rank-list">
+                    {% set rank_classes = ['rn-1','rn-2','rn-3','rn-x','rn-x'] %}
+                    {% for p in top_performers %}
+                    <li class="rank-item">
+                        <div class="rank-num {{ rank_classes[loop.index0] }}">{{ loop.index }}</div>
+                        <div class="rank-info">
+                            <div class="rank-name">{{ p.name }}</div>
+                            <div class="rank-dept">{{ p.department }} · {{ p.roll_no }}</div>
+                        </div>
+                        <div class="rank-score">{{ p.total_score }}</div>
+                    </li>
+                    {% else %}
+                    <li style="padding:30px;text-align:center;color:var(--muted);font-size:.82rem;">
+                        <i class="fa-solid fa-chart-bar" style="display:block;margin-bottom:8px;opacity:.2;font-size:1.5rem;"></i>
+                        No submission data yet
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="panel">
+                <div class="panel-hd">
+                    <div class="panel-title"><span class="ptdot" style="background:var(--accent)"></span> Score vs Attendance by Dept.</div>
+                </div>
+                <div class="panel-body">
+                    <div class="chart-wrap" style="height:220px;">
+                        <canvas id="cGrouped"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEPT TABLE -->
+        <div class="panel fu d6" style="margin-bottom:20px;">
+            <div class="panel-hd">
+                <div class="panel-title"><span class="ptdot" style="background:var(--green)"></span> Department-wise Breakdown</div>
+                <span style="font-size:.72rem;color:var(--muted);" id="tableLabel">{{ dept_stats|length }} departments</span>
+            </div>
+            <table class="tbl">
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Students</th>
+                        <th>Avg. Score</th>
+                        <th>Attendance</th>
+                        <th>Trend</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="deptTable">
+                    {% for dept in dept_stats %}
+                    <tr data-dept="{{ dept.name }}" style="animation:up 0.4s {{ loop.index0 * 0.07 }}s both;">
+                        <td>
+                            <span class="dept-pill
+                                {% if dept.name == 'CSE' %}dp-cse
+                                {% elif dept.name == 'ECE' %}dp-ece
+                                {% elif dept.name == 'MECH' %}dp-mech
+                                {% else %}dp-other{% endif %}">
+                                {{ dept.name }}
+                            </span>
+                        </td>
+                        <td style="font-weight:600;">{{ dept.student_count }}</td>
+                        <td>
+                            <div class="perf-cell">
+                                <div class="perf-bar"><div class="perf-fill" style="width:{{ dept.avg_score }}%;background:var(--amber);"></div></div>
+                                <div class="perf-pct">{{ dept.avg_score }}%</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="perf-cell">
+                                <div class="perf-bar"><div class="perf-fill" style="width:{{ dept.attendance }}%;background:var(--green);"></div></div>
+                                <div class="perf-pct">{{ dept.attendance }}%</div>
+                            </div>
+                        </td>
+                        <td><span class="trend up"><i class="fa-solid fa-arrow-trend-up" style="margin-right:3px;"></i>+3.2%</span></td>
+                        <td><span style="font-size:.72rem;color:var(--green);font-weight:700;"><i class="fa-solid fa-circle-check" style="margin-right:4px;"></i>Active</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+/* ──────────────────────────────────────────────
+   DATA FROM FLASK — all real, no static values
+────────────────────────────────────────────── */
+const DEPT_NAMES      = {{ dept_names      | tojson }};
+const DEPT_SCORES     = {{ dept_scores     | tojson }};
+const AVG_ATT         = {{ avg_attendance  }};
+const MONTHLY_LABELS  = {{ monthly_labels  | tojson }};
+const MONTHLY_VALUES  = {{ monthly_values  | tojson }};
+const TASK_COMPLETION = {{ task_completion | tojson }};
+
+/* dept_stats for student counts + attendance */
+const DEPT_STATS = [
+    {% for d in dept_stats %}
+    { name: {{ d.name | tojson }}, count: {{ d.student_count }}, score: {{ d.avg_score }}, att: {{ d.attendance }} }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+/* ──────────────────────────────────────────────
+   CHART.JS GLOBAL DEFAULTS
+────────────────────────────────────────────── */
+Chart.defaults.font.family = 'Outfit';
+Chart.defaults.font.size   = 11;
+Chart.defaults.color       = '#64748b';
+
+const COLORS  = ['#2563eb','#f59e0b','#10b981','#ef4444','#8b5cf6'];
+const COLORS_A= ['rgba(37,99,235,.8)','rgba(245,158,11,.8)','rgba(16,185,129,.8)'];
+
+const GRID_CFG = { color: '#f1f5f9' };
+const SCALE_Y  = { beginAtZero: true, max: 100, grid: GRID_CFG };
+const SCALE_X  = { grid: { display: false } };
+
+/* helper to get canvas context */
+function ctx(id) { return document.getElementById(id).getContext('2d'); }
+
+/* ── 1. SCORE BAR (switchable) ── */
+let scoreChart = new Chart(ctx('cScore'), {
+    type: 'bar',
+    data: {
+        labels: DEPT_NAMES,
+        datasets: [{
+            label: 'Avg % Score',
+            data: DEPT_SCORES,
+            backgroundColor: COLORS_A,
+            borderRadius: 8,
+            barThickness: 50
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: SCALE_Y, x: SCALE_X }
+    }
+});
+
+function switchScore(type, el) {
+    document.querySelectorAll('.ptab').forEach(t => t.classList.remove('on'));
+    el.classList.add('on');
+    scoreChart.destroy();
+
+    const isRadar = type === 'radar';
+    scoreChart = new Chart(ctx('cScore'), {
+        type: type,
+        data: {
+            labels: DEPT_NAMES,
+            datasets: [{
+                label: 'Avg % Score',
+                data: DEPT_SCORES,
+                backgroundColor: isRadar ? 'rgba(37,99,235,.15)' : COLORS_A,
+                borderColor: COLORS,
+                borderWidth: 2,
+                borderRadius: type === 'bar' ? 8 : 0,
+                barThickness: type === 'bar' ? 50 : undefined,
+                fill: true,
+                tension: .4,
+                pointRadius: type === 'line' ? 5 : 4,
+                pointBackgroundColor: COLORS
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: isRadar ? { r: { beginAtZero: true, max: 100 } } : { y: SCALE_Y, x: SCALE_X }
+        }
+    });
+}
+
+/* ── 2. ATTENDANCE DONUT ── */
+new Chart(ctx('cDonut'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Present', 'Absent'],
+        datasets: [{
+            data: [AVG_ATT, 100 - AVG_ATT],
+            backgroundColor: ['#10b981', '#e2e8f0'],
+            borderWidth: 0,
+            hoverOffset: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '72%',
+        plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw}%` } }
+        }
+    }
+});
+
+/* ── 3. STUDENT DISTRIBUTION PIE ── */
+new Chart(ctx('cPie'), {
+    type: 'pie',
+    data: {
+        labels: DEPT_STATS.map(d => d.name),
+        datasets: [{
+            data: DEPT_STATS.map(d => d.count),
+            backgroundColor: COLORS,
+            borderWidth: 3,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, padding: 12 } }
+        }
+    }
+});
+
+/* ── 4. MONTHLY ATTENDANCE LINE ── */
+new Chart(ctx('cLine'), {
+    type: 'line',
+    data: {
+        labels: MONTHLY_LABELS.length ? MONTHLY_LABELS : ['No data'],
+        datasets: [{
+            label: 'Attendance %',
+            data: MONTHLY_VALUES.length ? MONTHLY_VALUES : [0],
+            borderColor: '#8b5cf6',
+            backgroundColor: 'rgba(139,92,246,.08)',
+            fill: true,
+            tension: .4,
+            pointRadius: 4,
+            pointBackgroundColor: '#8b5cf6'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: false, min: 0, max: 100, grid: GRID_CFG },
+            x: SCALE_X
+        }
+    }
+});
+
+/* ── 5. TASK COMPLETION POLAR ── */
+new Chart(ctx('cPolar'), {
+    type: 'polarArea',
+    data: {
+        labels: DEPT_NAMES,
+        datasets: [{
+            data: TASK_COMPLETION,
+            backgroundColor: [
+                'rgba(239,68,68,.65)',
+                'rgba(245,158,11,.65)',
+                'rgba(16,185,129,.65)'
+            ],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10 } }
+        }
+    }
+});
+
+/* ── 6. GROUPED BAR ── */
+new Chart(ctx('cGrouped'), {
+    type: 'bar',
+    data: {
+        labels: DEPT_NAMES,
+        datasets: [
+            {
+                label: 'Avg Score %',
+                data: DEPT_SCORES,
+                backgroundColor: 'rgba(37,99,235,.82)',
+                borderRadius: 6,
+                barThickness: 26
+            },
+            {
+                label: 'Attendance %',
+                data: DEPT_STATS.map(d => d.att),
+                backgroundColor: 'rgba(16,185,129,.82)',
+                borderRadius: 6,
+                barThickness: 26
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, padding: 14 } }
+        },
+        scales: { y: SCALE_Y, x: SCALE_X }
+    }
+});
+
+/* ──────────────────────────────────────────────
+   DEPT FILTER — chips + table rows + chart update
+────────────────────────────────────────────── */
+let activeDept = 'All';
+
+function handleChip(el) {
+    const group = el.dataset.group;
+    document.querySelectorAll(`.fl-chip[data-group="${group}"]`).forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
+    if (group === 'dept') {
+        activeDept = el.dataset.val;
+        filterTable();
+        updateChartsForDept();
+    }
+}
+
+function filterTable() {
+    const rows = document.querySelectorAll('#deptTable tr[data-dept]');
+    let visible = 0;
+    rows.forEach(row => {
+        const show = activeDept === 'All' || row.dataset.dept === activeDept;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('tableLabel').textContent = visible + ' department' + (visible !== 1 ? 's' : '');
+}
+
+function updateChartsForDept() {
+    let names, scores, attData, counts;
+    if (activeDept === 'All') {
+        names   = DEPT_NAMES;
+        scores  = DEPT_SCORES;
+        attData = DEPT_STATS.map(d => d.att);
+        counts  = DEPT_STATS.map(d => d.count);
+    } else {
+        const idx = DEPT_NAMES.indexOf(activeDept);
+        if (idx === -1) return;
+        names   = [DEPT_NAMES[idx]];
+        scores  = [DEPT_SCORES[idx]];
+        attData = [DEPT_STATS[idx]?.att ?? 0];
+        counts  = [DEPT_STATS[idx]?.count ?? 0];
+    }
+
+    /* update score chart data */
+    scoreChart.data.labels                       = names;
+    scoreChart.data.datasets[0].data             = scores;
+    scoreChart.data.datasets[0].backgroundColor  = activeDept === 'All' ? COLORS_A : [COLORS_A[DEPT_NAMES.indexOf(activeDept)] ?? COLORS_A[0]];
+    scoreChart.update();
+
+    /* update grouped chart */
+    const gc = Chart.getChart('cGrouped');
+    if (gc) {
+        gc.data.labels              = names;
+        gc.data.datasets[0].data    = scores;
+        gc.data.datasets[1].data    = attData;
+        gc.update();
+    }
+
+    /* update pie */
+    const pc = Chart.getChart('cPie');
+    if (pc) {
+        pc.data.labels           = activeDept === 'All' ? DEPT_STATS.map(d => d.name) : [activeDept];
+        pc.data.datasets[0].data = counts;
+        pc.update();
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post MCQ Task | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --accent:#2563eb;--accent-light:#eff6ff;--text:#0f172a;--muted:#64748b;--border:#e2e8f0;--bg:#f0f6ff; }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{min-height:100vh;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);}
+
+        /* HEADER BG */
+        .page-header {
+            position:relative;height:200px;overflow:hidden;
+        }
+        .ph-img {
+            position:absolute;inset:0;
+            background:url('https://images.pexels.com/photos/159844/cellular-education-classroom-159844.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat;
+            filter:brightness(.75) saturate(.85);
+        }
+        .ph-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(37,99,235,.2) 0%,rgba(15,23,42,.6) 100%);}
+        .ph-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:0;}
+
+        .topbar{display:flex;align-items:center;gap:14px;padding:16px 36px;background:rgba(255,255,255,.1);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.12);}
+        .tb-back{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.82rem;transition:.2s;}
+        .tb-back:hover{color:#fff;}
+        .tb-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;flex:1;text-align:center;color:#fff;}
+        .tb-badge{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;font-size:.74rem;color:#fff;font-weight:600;}
+
+        .ph-text{padding:18px 36px 22px;}
+        .ph-eyebrow{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 11px;margin-bottom:8px;font-size:.7rem;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:.5px;}
+        .ph-title{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;color:#fff;margin-bottom:3px;}
+        .ph-sub{font-size:.82rem;color:rgba(255,255,255,.65);}
+
+        .content{max-width:740px;margin:0 auto;padding:32px 24px 60px;}
+
+        .card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:34px;box-shadow:0 4px 20px rgba(37,99,235,.06);animation:rise .45s both;}
+        @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+        .field{margin-bottom:20px;}
+        .field label{display:block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
+        .fi{position:relative;}
+        .fi i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:.8rem;pointer-events:none;}
+        .fi i.top{top:13px;transform:none;}
+        .fi input,.fi textarea,.fi select{
+            width:100%;padding:11px 11px 11px 34px;
+            background:#f8fafc;border:1.5px solid var(--border);
+            border-radius:10px;color:var(--text);font-size:.88rem;
+            font-family:'DM Sans',sans-serif;outline:none;transition:.2s;resize:vertical;appearance:none;
+        }
+        .fi input::placeholder,.fi textarea::placeholder{color:#cbd5e1;}
+        .fi input:focus,.fi textarea:focus,.fi select:focus{background:#fff;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+        .fi select option{background:#fff;}
+
+        .opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .opt-item{position:relative;}
+        .opt-letter{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:5px;background:#eff6ff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--accent);pointer-events:none;z-index:1;}
+        .opt-item input{padding-left:42px;}
+
+        .divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
+
+        .correct-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;display:block;}
+        .correct-row{display:flex;gap:10px;flex-wrap:wrap;}
+        .correct-btn{
+            flex:1;min-width:80px;padding:10px 8px;
+            background:#f8fafc;border:1.5px solid var(--border);
+            border-radius:9px;color:var(--muted);font-size:.82rem;font-weight:600;
+            cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;
+        }
+        .correct-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-light);}
+        .correct-btn.selected{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 3px 10px rgba(37,99,235,.3);}
+        input[name="correct_option"]{display:none;}
+
+        .btn-submit{
+            width:100%;padding:14px;margin-top:6px;
+            background:linear-gradient(135deg,#2563eb,#1d4ed8);
+            border:none;border-radius:11px;
+            font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;
+            color:#fff;cursor:pointer;transition:.2s;
+            box-shadow:0 4px 14px rgba(37,99,235,.3);
+        }
+        .btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(37,99,235,.4);}
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <div class="ph-img"></div>
+        <div class="ph-overlay"></div>
+        <div class="ph-content">
+            <div class="topbar">
+                <a href="/staff_dashboard" class="tb-back"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+                <div class="tb-title">Create MCQ Task</div>
+                <div class="tb-badge"><i class="fa-solid fa-building" style="margin-right:4px;"></i>{{ session['staff_dept'] }}</div>
+            </div>
+            <div class="ph-text">
+                <div class="ph-eyebrow"><i class="fa-solid fa-circle-question"></i> MCQ Builder</div>
+                <div class="ph-title">Post a new question</div>
+                <div class="ph-sub">Students in <strong>{{ session['staff_dept'] }}</strong> will see this automatically.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <form method="POST" id="mcqForm">
+                <div class="field">
+                    <label>Question</label>
+                    <div class="fi">
+                        <i class="fa-solid fa-question top"></i>
+                        <textarea name="question" rows="3" placeholder="Enter your question here…" required style="padding-left:34px;"></textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Answer Options</label>
+                    <div class="opts-grid">
+                        <div class="opt-item"><div class="opt-letter">A</div><input type="text" name="opt_a" placeholder="Option A" required></div>
+                        <div class="opt-item"><div class="opt-letter">B</div><input type="text" name="opt_b" placeholder="Option B" required></div>
+                        <div class="opt-item"><div class="opt-letter">C</div><input type="text" name="opt_c" placeholder="Option C" required></div>
+                        <div class="opt-item"><div class="opt-letter">D</div><input type="text" name="opt_d" placeholder="Option D" required></div>
+                    </div>
+                </div>
+                <hr class="divider">
+                <span class="correct-label">Select Correct Answer</span>
+                <input type="hidden" name="correct_option" id="correctInput" required>
+                <div class="correct-row">
+                    <button type="button" class="correct-btn" onclick="pick('A',this)">✓ Option A</button>
+                    <button type="button" class="correct-btn" onclick="pick('B',this)">✓ Option B</button>
+                    <button type="button" class="correct-btn" onclick="pick('C',this)">✓ Option C</button>
+                    <button type="button" class="correct-btn" onclick="pick('D',this)">✓ Option D</button>
+                </div>
+                <br>
+                <button type="submit" class="btn-submit"><i class="fa-solid fa-paper-plane" style="margin-right:7px;"></i>Publish to Students</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        function pick(v,el){
+            document.querySelectorAll('.correct-btn').forEach(b=>b.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('correctInput').value=v;
+        }
+        document.getElementById('mcqForm').onsubmit=function(e){
+            if(!document.getElementById('correctInput').value){e.preventDefault();alert('Please select the correct answer.');}
+        };
+    </script>
+</body>
+</html>

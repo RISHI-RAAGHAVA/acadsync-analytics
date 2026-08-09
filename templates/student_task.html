@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tasks | ACADSYNC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --accent:#2563eb; --accent-light:#eff6ff;
+            --green:#10b981;  --green-light:#ecfdf5;
+            --amber:#f59e0b;
+            --text:#0f172a; --muted:#64748b;
+            --bg:#f0f6ff; --surface:#fff; --border:#e2e8f0;
+        }
+        *, *::before, *::after { box-sizing:border-box;margin:0;padding:0; }
+        body { min-height:100vh;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg); }
+
+        .page-header { position:relative;height:210px;overflow:hidden; }
+        .ph-img {
+            position:absolute;inset:0;
+            background:url('https://images.pexels.com/photos/1181534/pexels-photo-1181534.jpeg?auto=compress&cs=tinysrgb&w=1600') center/cover no-repeat;
+            filter:brightness(.72) saturate(.85);
+        }
+        .ph-ov { position:absolute;inset:0;background:linear-gradient(180deg,rgba(37,99,235,.22) 0%,rgba(15,23,42,.6) 100%); }
+        .ph-inner { position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:space-between; }
+
+        .topbar { display:flex;align-items:center;gap:10px;padding:15px 36px;background:rgba(255,255,255,.1);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.12); }
+        .tb-back { display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.8);text-decoration:none;font-size:.8rem;transition:.2s; }
+        .tb-back:hover{color:#fff;}
+        .tb-title { font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;flex:1;text-align:center;color:#fff; }
+        .tb-badge { background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px;font-size:.73rem;color:#fff;font-weight:600; }
+        .ph-text { padding:18px 36px 22px; }
+        .ph-eyebrow { display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:3px 11px;margin-bottom:8px;font-size:.7rem;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:.5px; }
+        .ph-title { font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:3px; }
+        .ph-sub { font-size:.8rem;color:rgba(255,255,255,.65); }
+
+        .content { max-width:840px;margin:0 auto;padding:28px 24px 60px; }
+
+        /* task cards */
+        .task-card {
+            background:var(--surface);border:1px solid var(--border);border-radius:18px;
+            overflow:hidden;margin-bottom:18px;
+            box-shadow:0 3px 12px rgba(15,23,42,.05);
+            animation:up .45s both;
+        }
+        @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+        .task-head {
+            padding:20px 24px;border-bottom:1px solid var(--border);
+            display:flex;align-items:flex-start;gap:14px;
+        }
+        .task-icon { width:44px;height:44px;border-radius:11px;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0; }
+        .task-meta { flex:1;min-width:0; }
+        .task-title { font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:5px; }
+        .task-badges { display:flex;gap:7px;flex-wrap:wrap; }
+        .badge { display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:.68rem;font-weight:600; }
+        .badge-marks { background:var(--accent-light);color:var(--accent); }
+        .badge-date  { background:#f1f5f9;color:var(--muted); }
+        .badge-file  { background:var(--green-light);color:var(--green); }
+
+        .task-desc { padding:16px 24px;font-size:.86rem;color:var(--muted);line-height:1.6;border-bottom:1px solid var(--border); }
+
+        /* answer form */
+        .task-form { padding:20px 24px; }
+        .form-lbl { font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px;display:block; }
+        .answer-area {
+            width:100%;padding:12px 14px;
+            background:#f8fafc;border:1.5px solid var(--border);
+            border-radius:11px;color:var(--text);font-size:.88rem;
+            font-family:'DM Sans',sans-serif;outline:none;transition:.2s;resize:vertical;min-height:100px;
+        }
+        .answer-area::placeholder { color:#cbd5e1; }
+        .answer-area:focus { background:#fff;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.08); }
+        .form-footer { display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:10px; }
+        .char-hint { font-size:.72rem;color:#cbd5e1; }
+        .btn-submit {
+            padding:10px 22px;
+            background:linear-gradient(135deg,#2563eb,#1d4ed8);
+            border:none;border-radius:9px;
+            font-family:'Syne',sans-serif;font-size:.84rem;font-weight:700;
+            color:#fff;cursor:pointer;transition:.2s;
+            box-shadow:0 3px 10px rgba(37,99,235,.3);
+            display:flex;align-items:center;gap:6px;
+        }
+        .btn-submit:hover { transform:translateY(-2px);box-shadow:0 6px 18px rgba(37,99,235,.4); }
+
+        /* empty state */
+        .empty-state { text-align:center;padding:60px 24px; }
+        .empty-state i { font-size:3rem;opacity:.15;display:block;margin-bottom:16px; }
+        .empty-title { font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:6px; }
+        .empty-sub { font-size:.84rem;color:var(--muted);margin-bottom:20px; }
+        .btn-home { display:inline-flex;align-items:center;gap:6px;padding:10px 20px;background:var(--accent);color:#fff;border-radius:9px;text-decoration:none;font-family:'Syne',sans-serif;font-size:.84rem;font-weight:700;transition:.2s; }
+        .btn-home:hover { background:#1d4ed8;color:#fff; }
+
+        .task-count { background:var(--accent-light);color:var(--accent);font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:8px; }
+    </style>
+</head>
+<body>
+    <div class="page-header">
+        <div class="ph-img"></div>
+        <div class="ph-ov"></div>
+        <div class="ph-inner">
+            <div class="topbar">
+                <a href="/student/dashboard" class="tb-back"><i class="fa-solid fa-arrow-left"></i> Dashboard</a>
+                <div class="tb-title">My Tasks</div>
+                <div class="tb-badge"><i class="fa-solid fa-pen-to-square" style="margin-right:4px;"></i>Activity</div>
+            </div>
+            <div class="ph-text">
+                <div class="ph-eyebrow"><i class="fa-solid fa-pen-to-square"></i> Tasks</div>
+                <div class="ph-title">Department Activity Tasks
+                    {% if tasks %}<span class="task-count">{{ tasks | length }} pending</span>{% endif %}
+                </div>
+                <div class="ph-sub">Submit your answers before the deadline — auto-graded instantly.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        {% if tasks %}
+            {% for task in tasks %}
+            <div class="task-card" style="animation-delay:{{ loop.index0 * 0.07 }}s;">
+                <div class="task-head">
+                    <div class="task-icon"><i class="fa-solid fa-file-pen"></i></div>
+                    <div class="task-meta">
+                        <div class="task-title">{{ task.title }}</div>
+                        <div class="task-badges">
+                            <span class="badge badge-marks"><i class="fa-solid fa-star"></i> {{ task.total_marks }} marks</span>
+                            <span class="badge badge-date"><i class="fa-solid fa-calendar"></i> {{ task.task_date }}</span>
+                            {% if task.file_name %}
+                            <a href="{{ url_for('static', filename='task_files/' + task.file_name) }}" target="_blank" class="badge badge-file" style="text-decoration:none;">
+                                <i class="fa-solid fa-paperclip"></i> View File
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-desc">{{ task.description }}</div>
+
+                <div class="task-form">
+                    <form action="/student/submit_answer/{{ task.id }}" method="POST">
+                        <label class="form-lbl">Your Answer</label>
+                        <textarea class="answer-area" name="answer" placeholder="Write your answer here… Be detailed for better keyword matches." required oninput="updateChar(this, '{{ task.id }}')"></textarea>
+                        <div class="form-footer">
+                            <span class="char-hint" id="char-{{ task.id }}">0 characters</span>
+                            <button type="submit" class="btn-submit">
+                                <i class="fa-solid fa-paper-plane"></i> Submit Answer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+
+        {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-check-circle" style="color:var(--green);opacity:.25;"></i>
+                <div class="empty-title">All caught up! 🎉</div>
+                <div class="empty-sub">You have no pending activity tasks. Great work staying on top of your submissions!</div>
+                <a href="/student/dashboard" class="btn-home"><i class="fa-solid fa-house"></i> Back to Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function updateChar(el, id) {
+            const n = el.value.length;
+            document.getElementById('char-' + id).textContent = n + ' character' + (n !== 1 ? 's' : '');
+        }
+    </script>
+</body>
+</html>
